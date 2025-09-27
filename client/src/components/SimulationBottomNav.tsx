@@ -4,37 +4,32 @@ import {
   Map, 
   Copy, 
   DollarSign, 
-  Zap, 
-  Terminal,
-  FileCheck
+  Zap
 } from 'lucide-react';
-import { useSimulation, useRouting } from '../contexts/SimulationContext';
-import { useI18n } from '../contexts/SimulationContext';
+import { useSimulation, useI18n } from '../contexts/SimulationContext';
 
 const navItems = {
   map: { icon: Map, label: 'navigation.map' },
   duplicates: { icon: Copy, label: 'navigation.duplicates' },
   costs: { icon: DollarSign, label: 'navigation.costs' },
-  actions: { icon: Zap, label: 'navigation.actions' },
-  diagnostics: { icon: Terminal, label: 'navigation.diagnostics' },
-  plan: { icon: FileCheck, label: 'navigation.plan' }
+  actions: { icon: Zap, label: 'navigation.actions' }
 };
 
 export default function SimulationBottomNav() {
-  const { mode, goal } = useSimulation();
-  const { getBottomNavOrder } = useRouting();
+  const { onboardingComplete } = useSimulation();
   const { t } = useI18n();
   const [location] = useLocation();
 
-  if (!mode || !goal) return null;
+  // Hide navigation during onboarding
+  if (!onboardingComplete) return null;
 
-  const navOrder = getBottomNavOrder();
-  const visibleNavItems = navOrder.slice(0, 4); // Show max 4 tabs for mobile
+  // Fixed navigation: Map · Duplicates · Costs · Actions
+  const fixedNavItems = ['map', 'duplicates', 'costs', 'actions'];
 
   return (
     <nav className="flex-none border-t bg-card">
       <div className="flex items-center justify-around p-2 pb-safe">
-        {visibleNavItems.map((itemKey) => {
+        {fixedNavItems.map((itemKey) => {
           const item = navItems[itemKey as keyof typeof navItems];
           if (!item) return null;
 

@@ -233,47 +233,9 @@ export function useRouting() {
       return '/onboarding';
     }
 
-    // Route matrix as specified in requirements
-    if (mode === 'easy') {
-      switch (goal) {
-        case 'view': return '/map';
-        case 'suggest': return '/actions';
-        case 'plan': return '/plan';
-        default: return '/map';
-      }
-    }
-
-    if (mode === 'standard') {
-      switch (goal) {
-        case 'view': return '/map';
-        case 'suggest': return '/actions';
-        case 'plan': return '/actions'; // Plan is integrated into actions for standard
-        default: return '/map';
-      }
-    }
-
-    // Pro mode always goes to diagnostics
-    return '/diagnostics';
+    // Fixed navigation - always start with Map tab
+    return '/map';
   };
 
-  const getBottomNavOrder = (): string[] => {
-    if (!mode || !goal) return ['map', 'duplicates', 'costs', 'actions'];
-
-    // Reorder tabs based on mode and goal
-    if (mode === 'easy') {
-      if (goal === 'view') return ['map', 'duplicates', 'costs', 'actions'];
-      if (goal === 'suggest') return ['actions', 'map', 'duplicates', 'costs'];
-      if (goal === 'plan') return ['plan', 'actions', 'map', 'costs'];
-    }
-
-    if (mode === 'standard') {
-      if (goal === 'suggest') return ['actions', 'map', 'duplicates', 'costs'];
-      return ['map', 'actions', 'duplicates', 'costs'];
-    }
-
-    // Pro mode
-    return ['diagnostics', 'map', 'duplicates', 'costs', 'actions'];
-  };
-
-  return { getDefaultRoute, getBottomNavOrder };
+  return { getDefaultRoute };
 }
