@@ -5,6 +5,7 @@ import { BarChart3, Table } from 'lucide-react';
 import { useState } from 'react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
+import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 
 export default function MapView() {
   const { storageBreakdown, mode } = useSimulation();
@@ -21,6 +22,9 @@ export default function MapView() {
         <h1 className="text-2xl font-bold">{t('map.title')}</h1>
         <p className="text-muted-foreground">{t('map.subtitle')}</p>
       </div>
+
+      {/* Estimated Savings Banner */}
+      <EstimatedSavingsBanner />
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">

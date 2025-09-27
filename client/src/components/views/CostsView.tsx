@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign } from 'lucide-react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
+import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 
 export default function CostsView() {
   const { storageBreakdown, mode } = useSimulation();
@@ -17,6 +18,9 @@ export default function CostsView() {
         <h1 className="text-2xl font-bold">{t('costs.title')}</h1>
         <p className="text-muted-foreground">{t('costs.subtitle')}</p>
       </div>
+
+      {/* Estimated Savings Banner */}
+      <EstimatedSavingsBanner />
 
       {/* Total cost summary */}
       <Card>

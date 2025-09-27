@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
+import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 
 export default function DuplicatesView() {
   const { duplicateClusters, mode } = useSimulation();
@@ -30,6 +31,9 @@ export default function DuplicatesView() {
         <h1 className="text-2xl font-bold">{t('duplicates.title')}</h1>
         <p className="text-muted-foreground">{t('duplicates.subtitle')}</p>
       </div>
+
+      {/* Estimated Savings Banner */}
+      <EstimatedSavingsBanner />
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
