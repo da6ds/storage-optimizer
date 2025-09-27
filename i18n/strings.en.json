@@ -1,0 +1,210 @@
+{
+  "app": {
+    "title": "File Inventory Optimizer",
+    "subtitle": "Smart Cloud Storage Management",
+    "description": "Optimize your cloud storage costs across Google Drive, Dropbox, OneDrive, and iCloud"
+  },
+  "onboarding": {
+    "title": "Let's get started",
+    "subtitle": "Two quick questions to customize your experience",
+    "q_familiarity": "How familiar are you with file storage & cloud services?",
+    "familiarity": {
+      "easy": "I'm not technical",
+      "standard": "I'm comfortable with tech", 
+      "pro": "I work with systems/code"
+    },
+    "familiarity_help": {
+      "easy": "We'll keep things simple with clear recommendations",
+      "standard": "We'll show you options with helpful context",
+      "pro": "We'll give you full transparency and detailed controls"
+    },
+    "q_goal": "What do you want to do today?",
+    "goal": {
+      "view": "Just show me where my stuff is",
+      "suggest": "Recommend ways to save money",
+      "plan": "Create a step-by-step plan to do it for me (simulation only)"
+    },
+    "goal_help": {
+      "view": "Explore your file distribution across providers",
+      "suggest": "Get actionable cost-saving recommendations",
+      "plan": "Generate a detailed optimization checklist"
+    },
+    "button_continue": "Continue"
+  },
+  "navigation": {
+    "map": "Map",
+    "duplicates": "Duplicates",
+    "costs": "Costs",
+    "actions": "Actions",
+    "diagnostics": "Diagnostics"
+  },
+  "mode_indicator": {
+    "easy": "Easy Mode",
+    "standard": "Standard Mode", 
+    "pro": "Pro Mode",
+    "change": "Change Mode"
+  },
+  "goal_indicator": {
+    "view": "Viewing",
+    "suggest": "Suggesting",
+    "plan": "Planning",
+    "change": "Change Goal"
+  },
+  "map": {
+    "title": "Storage Overview",
+    "subtitle": "Your files across all providers",
+    "provider_tiles_title": "Provider Summary",
+    "storage_breakdown_title": "Storage by File Type",
+    "what_this_means": {
+      "easy": "This shows where your files are stored and how much space they use. The bigger sections use more storage.",
+      "standard": "Your file distribution across providers. Large files and duplicates are the biggest opportunities for savings.",
+      "pro": "Complete storage analysis with provider utilization, file type distribution, and optimization opportunities."
+    },
+    "view_as_table": "View as table",
+    "view_as_chart": "View as chart",
+    "total_files": "Total files",
+    "total_size": "Total size",
+    "estimated_cost": "Est. monthly cost"
+  },
+  "duplicates": {
+    "title": "Duplicate Files",
+    "subtitle": "Files that exist in multiple places",
+    "clusters_found": "duplicate clusters found",
+    "total_duplicates": "total duplicate files",
+    "potential_savings": "potential monthly savings",
+    "keep_here_badge": "Keep here",
+    "cluster_info": "{{count}} copies across {{providers}} providers",
+    "what_this_means": {
+      "easy": "These are the same files stored in multiple places. You can safely remove the extras to save money.",
+      "standard": "Duplicate clusters ranked by storage savings. We recommend keeping files on the cheapest provider.",
+      "pro": "Hash-based deduplication analysis with provider cost optimization and conflict resolution strategies."
+    },
+    "expand_cluster": "Show files",
+    "collapse_cluster": "Hide files"
+  },
+  "costs": {
+    "title": "Cost Breakdown",
+    "subtitle": "Monthly estimates by provider",
+    "sample_pricing_badge": "Sample pricing",
+    "provider": "Provider",
+    "plan": "Plan",
+    "used": "Used",
+    "cost": "Monthly Cost",
+    "what_this_means": {
+      "easy": "This shows how much you're paying each month for storage. Higher bars mean higher costs.",
+      "standard": "Current monthly costs based on usage and provider pricing. Consolidation can reduce total spend.",
+      "pro": "Detailed cost analysis including base plans, overage charges, and optimization opportunities by provider tier."
+    },
+    "total_monthly": "Total monthly estimate"
+  },
+  "actions": {
+    "title": "Optimization Actions",
+    "subtitle": "Recommended ways to save money",
+    "no_actions": "No optimization opportunities found",
+    "plan_savings_cta": "Plan my savings",
+    "plan_disabled_tooltip": "This is a simulation - no actual changes can be made",
+    "what_this_means": {
+      "easy": "These are simple steps you can take to save money on storage costs.",
+      "standard": "Prioritized recommendations based on potential savings and implementation effort.",
+      "pro": "Comprehensive optimization strategy with risk assessment and implementation complexity analysis."
+    },
+    "types": {
+      "dedupe": "Remove Duplicates",
+      "cold_storage": "Archive Old Files",
+      "consolidation": "Consolidate Storage"
+    },
+    "dedupe_description": "Remove extra copies, keep file on cheapest provider",
+    "cold_storage_description": "Move large, old files to cheaper archive storage",
+    "consolidation_description": "Combine scattered files into a single provider",
+    "friction_levels": {
+      "low": "Low",
+      "medium": "Medium", 
+      "high": "High"
+    },
+    "friction_help": {
+      "low": "Quick and easy to implement",
+      "medium": "Requires some manual work",
+      "high": "Complex, may need technical expertise"
+    }
+  },
+  "diagnostics": {
+    "title": "Raw Data & Diagnostics",
+    "subtitle": "Technical details and export options",
+    "files_table_title": "All Files",
+    "duplicates_table_title": "Duplicate Clusters", 
+    "costs_table_title": "Cost Calculations",
+    "heuristics_title": "Analysis Settings",
+    "export_json": "Export JSON",
+    "export_csv": "Export CSV",
+    "export_markdown": "Export Report",
+    "export_pdf": "Export PDF",
+    "heuristics": {
+      "cold_file_threshold": "Cold file threshold: {{days}} days",
+      "large_file_threshold": "Large file threshold: {{size}}",
+      "duplicate_detection": "Hash-based duplicate detection",
+      "cost_optimization": "Prefer cheapest provider for duplicates"
+    }
+  },
+  "file_types": {
+    "image": "Images",
+    "video": "Videos", 
+    "audio": "Audio",
+    "document": "Documents",
+    "archive": "Archives",
+    "other": "Other"
+  },
+  "providers": {
+    "google_drive": "Google Drive",
+    "drive": "Google Drive",
+    "dropbox": "Dropbox", 
+    "onedrive": "OneDrive",
+    "icloud": "iCloud",
+    "local": "Local Storage"
+  },
+  "units": {
+    "bytes": "B",
+    "kb": "KB", 
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
+  },
+  "labels": {
+    "save_per_month": "Estimated savings / month",
+    "friction": "Friction",
+    "risk_note": "Simulation only — no changes made.",
+    "sample_pricing": "Sample pricing",
+    "loading": "Loading...",
+    "error": "Error loading data",
+    "no_data": "No data available",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "glossary": {
+    "duplicate": "Two or more files that are exactly the same.",
+    "cold_files": "Files you haven't opened in a long time.",
+    "archive_tier": "Cheaper storage meant for files you rarely use.",
+    "provider": "A cloud storage service like Google Drive or Dropbox.",
+    "cluster": "A group of duplicate files that share the same content.",
+    "hash": "A unique fingerprint that identifies file content.",
+    "overage": "Extra storage costs beyond your plan's included amount."
+  },
+  "accessibility": {
+    "chart_summary": "Chart showing {{description}}",
+    "table_alternative": "View this data as a table instead",
+    "large_text_toggle": "Large text mode",
+    "skip_to_content": "Skip to main content",
+    "menu_toggle": "Toggle navigation menu"
+  },
+  "plan_preview": {
+    "title": "Your Optimization Plan",
+    "subtitle": "Step-by-step checklist (simulation only)",
+    "total_estimated_savings": "Total estimated monthly savings: {{amount}}",
+    "steps": "Optimization steps",
+    "step_completed": "Completed",
+    "step_pending": "Pending", 
+    "simulation_note": "This is a simulation preview. In a real implementation, you could follow these steps to optimize your storage."
+  }
+}

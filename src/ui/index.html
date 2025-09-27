@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Storage Optimizer (Sim)</title>
+<link rel="stylesheet" href="./tokens.css"/>
+<body>
+  <div id="app" class="page">
+    <header class="topbar">Storage Optimizer (Simulation)</header>
+    <main id="content" aria-live="polite"></main>
+    <nav class="tabbar" role="tablist" aria-label="Main">
+      <button role="tab" data-tab="map" aria-selected="true">Map</button>
+      <button role="tab" data-tab="duplicates">Duplicates</button>
+      <button role="tab" data-tab="costs">Costs</button>
+      <button role="tab" data-tab="actions">Actions</button>
+    </nav>
+    <button id="primaryCta" class="cta" disabled>Plan my savings (simulation)</button>
+  </div>
+  <script type="module" src="./app.ts"></script>
+</body>
+</html>

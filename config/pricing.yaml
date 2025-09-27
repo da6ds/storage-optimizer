@@ -1,0 +1,6 @@
+providers:
+  google_drive: { plan: "Google One 200GB (sample)", base_usd_per_month: 2.99, included_gb: 200, overage_usd_per_gb: 0.03 }
+  dropbox:      { plan: "Plus 2TB (sample)",          base_usd_per_month: 11.99, included_gb: 2000, overage_usd_per_gb: 0.02 }
+  onedrive:     { plan: "Microsoft 365 1TB (sample)", base_usd_per_month: 6.99, included_gb: 1000, overage_usd_per_gb: 0.02 }
+  icloud:       { plan: "iCloud+ 200GB (sample)",     base_usd_per_month: 2.99, included_gb: 200, overage_usd_per_gb: 0.03 }
+notes: "Sample pricing only for simulation."
