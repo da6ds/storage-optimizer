@@ -1,0 +1,102 @@
+Goal:
+Design (and simulate) a cross-storage File Inventory & Optimization tool with a mobile-first, device-native UI. It inventories files across providers (Local, Google Drive, Dropbox, iCloud, OneDrive), detects duplicates, estimates monthly costs, and presents clear, visual optimization suggestions. Build an adaptive UI using a two-question onboarding to tailor complexity and intent.
+
+Two-question onboarding (drives the whole app state):
+	1.	Familiarity: “How familiar are you with file storage & cloud services?”
+	•	Easy (not technical) · Standard (comfortable) · Pro (engineer)
+	2.	Goal: “What do you want to do today?”
+	•	Just show me where my stuff is (View Only)
+	•	Recommend ways to save money (Suggestions)
+	•	Do it for me (Automation Plan; simulation only, no side effects)
+
+Onboarding → Mode/Flow matrix:
+	•	Easy × View Only → land on Map (cost tiles + storage treemap), large text, glossary open.
+	•	Easy × Suggestions → land on Savings with 3 big cards: Duplicates, Cold Files, Consolidation; one disabled “Plan my savings” button.
+	•	Easy × Automation Plan → same as Suggestions, plus a Step-by-Step Plan preview (dry-run).
+	•	Standard × View Only → land on Overview (filters collapsed, charts first).
+	•	Standard × Suggestions → land on Recommendations list (sortable by $/mo).
+	•	Pro × any → land on Diagnostics pane (raw tables, JSON, heuristic weights), with mode switcher persistent.
+Users can switch mode/goal anytime from a header chip; changes re-order nav and toggle detail density.
+
+Mobile experience (must be best-in-class):
+	•	PWA, offline demo (simulated data), safe-area insets, bottom tab bar (Map, Duplicates, Costs, Actions).
+	•	System fonts, native-feeling spacing/haptics, tap targets ≥44×44px, sticky primary CTA at bottom.
+	•	Charts designed for small screens (one chart per view, text annotations, “view as table” toggle).
+	•	Performance budget: TTI < 2.5s mid-tier phone; first-load JS < 180KB gzip; lazy-load images.
+	•	Accessibility: WCAG 2.2 AA, large-text toggle (18–20px), color-blind-safe palette, ARIA summaries for charts.
+
+Context (simulation only):
+No real credentials. Produce a design doc, mock adapters, and fake datasets that reflect real-world variety (big videos, photo bursts, PDFs, “tax” docs) with overlaps for de-dupe and varied recency for cold-file rules.
+
+Stack & constraints:
+	•	Node.js + TypeScript.
+	•	CLI: simulate, plan, report.
+	•	Schema (single record):
+{ id, provider, provider_id, path, size_bytes, last_modified, hash, mime, url?, access_tier?, location? }
+	•	Duplicate detection: hash (SHA-256 for local mock; md5/content_hash in real build later).
+	•	Cost model: /config/pricing.yaml (plan, $/mo, included GB, overage $/GB, region/request fees).
+	•	Optimization engine ranks by (estimated $/mo savings, access friction, risk).
+
+Deliverables:
+	•	/docs/architecture.md — system diagram, data model, adapter interface, later rate-limit strategy, security plan.
+	•	/docs/accessibility.md — WCAG checklist, keyboard/screen-reader matrix, color tokens, motion policy.
+	•	/docs/mobile.md — mobile design rules (breakpoints, bottom-nav, thumb reach, haptics, perf budget).
+	•	/docs/onboarding.md — exact copy for the two questions; mapping to mode/goal; nav re-ordering & default toggles per combination.
+	•	/data/fake/*.json — realistic inventories with dupes & cold files.
+	•	/config/pricing.yaml — sample pricing (clearly labeled).
+	•	/src/sim/adapters/*.ts — mock providers emitting the normalized schema.
+	•	/src/optimize/engine.ts — rules:
+	•	Dedupe: keep newest or cheapest provider (configurable tie-break).
+	•	Cold storage: ≥1 GB & inactive ≥180 days → propose cheapest “archive-tier”.
+	•	Consolidation: group by folder/name heuristics; propose single home.
+	•	UI (PWA) with adaptive modes & goals
+	•	/src/ui/mode/{easy,standard,pro}/* — component visibility, density, tooltips, exports.
+	•	Easy: plain-language “What this means” under every chart; glossary; single CTA “Plan my savings” (disabled).
+	•	Standard: filters (provider/type/age), duplicate clusters viewer, top-N heavy files, CSV/MD/PDF export.
+	•	Pro: raw tables, JSON export, config overlays, heuristic weights, perf panel.
+	•	Goal-driven landing: Map / Recommendations / Plan preview.
+	•	/src/cli.ts — commands:
+	•	simulate --providers local,drive,dropbox,icloud,onedrive --seed 42 --count 5000
+	•	plan → milestones for the real implementation.
+	•	report --mode easy|standard|pro --goal view|suggest|plan --format html,markdown,csv --locale en-US --currency USD --topN 50 --printable
+	•	Writes /out/index.html (PWA), /out/report.md, /out/report.csv, optional /out/report.pdf.
+	•	/i18n/strings.en.json — UI strings for all modes/goals + glossary.
+
+What the user sees first (by onboarding result):
+	•	Easy · View → “You’re using about $X/mo across 5 services.” Big tiles; “What this means.”
+	•	Easy · Suggest → “You could save ~$Y/mo.” Three big cards (Duplicates / Cold / Consolidate) with simple explanations.
+	•	Easy · Plan → Same as Suggest + dry-run “Your savings plan” checklist (disabled Apply).
+	•	Standard · Suggest → Sorted recommendations list (by $/mo), filters closed.
+	•	Pro · Any → Diagnostics (raw tables, weights overlay) with charts docked.
+
+Optimization transparency:
+Every recommendation shows:
+	•	Estimated $/mo savings (math visible in Pro, summarized elsewhere).
+	•	Friction score (Low/Med/High: auth/setup, item count, provider changes).
+	•	Risk note: simulation only; no deletes.
+
+Acceptance tests:
+	•	simulate → ≥5k items; ≥10% cross-provider dupes.
+	•	Onboarding: selecting (mode, goal) changes landing view, nav order, and default toggles exactly per /docs/onboarding.md.
+	•	Mobile PWA (360×800): Performance ≥90, Accessibility ≥95, PWA installable; first interaction <100ms; CLS ≤0.1; tap targets ≥44px.
+	•	Easy mode: glossary visible, plain-language “What this means” on all visuals; VoiceOver/TalkBack readouts for charts.
+	•	Standard mode: filters + exports work; responsive tables don’t overflow.
+	•	Pro mode: JSON/SQL/diff exports; heuristic weight sliders don’t alter core results unless applied intentionally.
+	•	--goal plan produces a dry-run action list artifact; no side effects.
+	•	--printable → one-page PDF with large fonts and plain summaries.
+
+Scope guardrails:
+No API calls or secrets; pricing marked sample. Thresholds & weights in config (tweak without code).
+
+Defaults (use if unspecified):
+“Cold” = 180 days; “Large” = ≥1 GB; Providers = all five; Units = GB; Locale = en-US; Currency = USD; topN = 50.
+
+Exact onboarding copy (drop-in):
+	•	Q1: “How familiar are you with file storage and cloud services?”
+	•	Easy — “I’m not technical.”
+	•	Standard — “I’m comfortable with tech.”
+	•	Pro — “I work with systems/code.”
+	•	Q2: “What do you want to do today?”
+	•	View — “Just show me where my stuff is.”
+	•	Suggest — “Recommend ways to save money.”
+	•	Plan — “Create a step-by-step plan to do it for me.” (simulation only—no changes made)
