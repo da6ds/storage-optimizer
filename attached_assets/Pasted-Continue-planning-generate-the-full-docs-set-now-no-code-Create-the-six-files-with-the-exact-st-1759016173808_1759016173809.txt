@@ -1,0 +1,58 @@
+Continue planning — generate the full docs set now (no code):
+Create the six files with the exact structure below. Use simple, direct language. Include ASCII wireframes. Keep everything Simulation Mode–only.
+/docs/ux-flow.md
+Sections: Overview · Personas · Onboarding (2 Qs) · Free tier journey · Upgrade journey · Pro journey · Done/History.
+Include a single-page flowchart (ASCII) from first launch → Done.
+Call out where Estimated Savings banner + Upgrade CTA appear on each tab.
+/docs/upgrade-flow.md
+Steps: Choose plan ( $10 one-time | $5/month ) → Confirm → In-app checkout → Success → Enable actions → Optional Backup add-on → Progress → Done.
+Show copy for: buttons, footnotes, error messages, cancellation, and success.
+Include an ASCII stepper with states and what the screen shows.
+/docs/navigation.md
+Fixed tabs: Map · Duplicates · Costs · Actions (always).
+Top-right Settings (Plan, History, Upgrade/Downgrade, Notifications).
+Explain how mode (Easy/Standard/Pro) and goal (View/Suggest/Plan) only change landing + density, not the nav.
+List keyboard shortcuts for web (arrow tabs, Enter to activate primary CTA).
+/docs/responsive.md
+Breakpoints:
+Mobile: 320–428px (primary) — bottom tabs, sticky CTA, tap targets ≥44×44px, large-text toggle 18–20px.
+iPad: 768–1024px — split view (left list/right detail), expanded charts/tables.
+Web: ≥1024px — centered max-width, multi-column grids, keyboard focus styles.
+Performance: target TTI <2.5s on mid-range phones; defer heavy JS; no layout shift >0.1.
+Accessibility: WCAG 2.2 AA, color-blind-safe palette, ARIA summaries for charts, “View as table” fallback everywhere.
+/docs/wireframes.md
+ASCII wireframes (Free and Pro) for: Onboarding, Map, Duplicates, Costs, Actions, Settings, Upgrade screens, Plan preview, Final confirm, Progress, Done.
+Each wireframe shows the Estimated Savings banner placement and the Upgrade CTA for Free.
+/docs/copy.md (final app copy; extremely straightforward)
+Onboarding
+Headline: See it all. Clean it all.
+Subcopy: Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.
+Buttons: Continue → See My Storage; footnote: Upgrade later to let the app fix it all for you.
+Savings banner (Free)
+Title: You could save about ${{monthly_savings}}/month
+Body: These are safe previews. Upgrade to apply them automatically.
+CTA: Start saving now
+Actions (Free) — 3–5 items max, each with:
+Title examples:
+Remove exact duplicate photos across Google Drive and iCloud
+Move large, rarely opened videos to archive storage
+Keep project files in one place
+Chips: Estimated savings · Space to free · Friction · Simulation only
+Recommended badge: Recommended (based on savings + simplicity).
+Upgrade options
+$10 one-time — Clean it once
+$5/month — Keep it optimized
+Upgrade success
+Title: You’re set. Let’s clean things up.
+Subcopy: Review the plan. Unselect anything you don’t want.
+Primary: Start cleanup
+Plan preview / Confirm — clear steps (“What will happen”) + backup upsell copy.
+Errors & states — simple messages for payment failed, network retry, cancel.
+Also include in the docs:
+A small table listing where each Upgrade CTA appears (per tab) and its behavior Free vs Pro.
+IDs for analytics events (text only): onboarding_completed, upgrade_clicked, upgrade_started, upgrade_success, action_selected, plan_confirmed.
+Acceptance for this plan task
+All six files created with clear sections, ASCII wireframes, and the exact copy above.
+Explicit banner/CTA placement per tab.
+Responsive + accessibility rules documented.
+No code changes; this is planning only.

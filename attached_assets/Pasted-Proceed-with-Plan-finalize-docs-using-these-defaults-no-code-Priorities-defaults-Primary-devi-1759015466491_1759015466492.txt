@@ -1,0 +1,63 @@
+Proceed with Plan — finalize docs using these defaults (no code):
+Priorities & defaults
+Primary device: Mobile first; then iPad; then web.
+Free tier data: Show complete simulated data (no paywalls on visibility). All actions are read-only with Upgrade CTAs everywhere savings appear.
+Upgrade flow: In-app checkout with two options: $10 one-time (“Clean it once”) or $5/month (“Keep it optimized”).
+Copy style: Extremely straightforward. No jargon. Every screen explains what’s happening, why it matters, what to do next.
+Navigation: Always Map · Duplicates · Costs · Actions. Gear icon → Settings (Plan, History, Upgrade/Downgrade, Notifications).
+Deliverables to create now (in this order)
+/docs/ux-flow.md — end-to-end journey (Onboarding → Free snapshot → Upgrade → Pro actions → Done).
+/docs/upgrade-flow.md — one-tap upgrade: pricing choose → confirm → payment → success → enable actions → backup upsell.
+/docs/navigation.md — tabs stay fixed; mode/goal only changes landing & density.
+/docs/responsive.md — mobile/iPad/web breakpoints + layout rules (thumb reach, split view on iPad, wider tables on web).
+/docs/wireframes.md — text wireframes for each state (Free vs Pro) for: Onboarding, Map, Duplicates, Costs, Actions, Settings.
+/docs/copy.md — final plain-language copy for headlines, subcopy, banners, CTA labels, tooltips, “What this means” blurbs.
+Lock the two-question onboarding
+Headline: See it all. Clean it all.
+Subcopy: Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.
+Q1 (Familiarity): Easy · Standard · Pro
+Q2 (Goal): View only · Suggestions · Plan
+Primary CTA: Continue → See My Storage
+Footnote: Upgrade later to let the app fix it all for you.
+Free tier rules (show value, nudge upgrade)
+At the top of every tab, show an Estimated Savings banner derived from simulated math.
+Under the banner, a single CTA: Start saving now → opens Upgrade flow.
+Actions tab shows a short, clear list only (3–5 items max):
+Duplicates (name the type: exact file matches, same photo in multiple clouds, identical videos, etc.)
+Cold files (≥1 GB, inactive ≥180 days) → archive suggestion
+Consolidation (scatter from a project folder)
+Each item shows: Estimated savings $/mo, Space to free, Friction (Low/Med/High), and a one-sentence explanation.
+Highlight Recommended action (balance of savings, space, simplicity).
+Pro tier rules
+After upgrade, enable selection checkboxes on Actions.
+Plan preview page: show exactly what will happen, allow deselecting items.
+Final confirm with summary.
+Optional Backup add-on: “Back up anything we delete” with a clear price.
+Progress screen → Done screen with savings summary and “View history”.
+Settings (always available)
+Plan & Billing (upgrade/downgrade), History (past actions + trends), Notifications (for $5/mo), App preferences.
+Cross-device polish
+Mobile: bottom nav, sticky primary CTA, ≥44px tap targets, color-blind safe, ARIA chart summaries, “View as table” toggles.
+iPad: split view (left list, right detail), more columns, persistent savings banner + CTA.
+Web: centered wide layout, keyboard shortcuts, denser tables.
+Performance: snappy feel; avoid heavy animations; keep interactions instant.
+Provide concrete content in /docs/copy.md (use these exact strings)
+Savings banner (free):
+Title: You could save about $XX/month
+Body: These suggestions are safe previews. Upgrade to apply them automatically.
+CTA: Start saving now
+Actions item labels:
+Duplicates: Remove exact duplicate photos across Google Drive and iCloud
+Cold files: Move large, rarely opened videos to archive storage
+Consolidation: Keep project files in one place
+Free action chips: “Estimated savings”, “Space to free”, “Friction”, “Simulation only”
+Upgrade options:
+$10 one-time — Clean it once
+$5/month — Keep it optimized
+Upgrade success: You’re set. Let’s clean things up.
+Subcopy: You can review and unselect items before we start.
+Acceptance for this Plan task
+Produce all six docs above with wireframes and the exact copy blocks.
+Make explicit where upgrade CTAs appear on each tab and how they behave in Free vs Pro.
+Show how layouts adapt at mobile (primary), iPad, and web breakpoints.
+Keep every sentence simple and direct.
