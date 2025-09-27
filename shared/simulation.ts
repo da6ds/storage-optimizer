@@ -55,12 +55,26 @@ export interface StorageBreakdown {
   file_types: Record<string, { count: number; size_gb: number }>;
 }
 
+// Provider key normalization - maps file provider names to pricing config keys
+function normalizeProviderKey(provider: string): string {
+  const providerMap: Record<string, string> = {
+    'drive': 'google_drive',
+    'google_drive': 'google_drive',
+    'dropbox': 'dropbox',
+    'onedrive': 'onedrive',
+    'icloud': 'icloud',
+    'local': 'local'
+  };
+  return providerMap[provider.toLowerCase()] || provider;
+}
+
 // Cost calculation utilities
 export class CostCalculator {
   constructor(private pricingConfig: PricingConfig) {}
 
   calculateProviderCost(provider: string, usageGb: number): number {
-    const pricing = this.pricingConfig.providers[provider];
+    const normalizedProvider = normalizeProviderKey(provider);
+    const pricing = this.pricingConfig.providers[normalizedProvider];
     if (!pricing) return 0;
 
     if (usageGb <= pricing.included_gb) {
@@ -89,7 +103,8 @@ export class CostCalculator {
 
     for (const file of files) {
       const sizeGb = file.size_bytes / (1024 * 1024 * 1024);
-      const pricing = this.pricingConfig.providers[file.provider];
+      const normalizedProvider = normalizeProviderKey(file.provider);
+      const pricing = this.pricingConfig.providers[normalizedProvider];
       if (!pricing) continue;
 
       const currentCost = sizeGb * pricing.overage_usd_per_gb;
@@ -158,7 +173,7 @@ export class FileAnalyzer {
         // Find the keeper (preferably on cheapest provider, or newest file)
         let keeper = clusterFiles[0];
         for (const file of clusterFiles) {
-          if (file.provider === cheapest.provider) {
+          if (normalizeProviderKey(file.provider) === cheapest.provider) {
             keeper = file;
             break;
           }

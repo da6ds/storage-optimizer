@@ -1,8 +1,9 @@
 {
   "app": {
     "title": "File Inventory Optimizer",
-    "subtitle": "Smart Cloud Storage Management",
-    "description": "Optimize your cloud storage costs across Google Drive, Dropbox, OneDrive, and iCloud"
+    "subtitle": "Smart Cloud Storage Management", 
+    "description": "Optimize your cloud storage costs across Google Drive, Dropbox, OneDrive, and iCloud",
+    "simulation_mode": "Simulation Mode"
   },
   "onboarding": {
     "title": "Let's get started",
@@ -132,12 +133,39 @@
     "subtitle": "Technical details and export options",
     "files_table_title": "All Files",
     "duplicates_table_title": "Duplicate Clusters", 
+    "duplicates_table_subtitle": "Duplicate file clusters with savings potential",
     "costs_table_title": "Cost Calculations",
+    "costs_table_subtitle": "Detailed cost breakdown by provider",
     "heuristics_title": "Analysis Settings",
+    "export_options_title": "Export Options",
+    "export_options_subtitle": "Download raw data and reports",
+    "heuristics_subtitle": "Algorithm settings and thresholds",
+    "files_table_subtitle": "Complete file inventory across all providers",
+    "cold_files_label": "Cold Files",
+    "cold_files_desc": "Files not modified in 180+ days and ≥1GB",
+    "duplicates_label": "Duplicates",
+    "duplicates_desc": "Hash-based content matching across providers",
+    "cost_optimization_label": "Cost Optimization", 
+    "cost_optimization_desc": "Keep files on cheapest provider when duplicated",
     "export_json": "Export JSON",
     "export_csv": "Export CSV",
     "export_markdown": "Export Report",
     "export_pdf": "Export PDF",
+    "provider_header": "Provider",
+    "path_header": "Path",
+    "size_header": "Size",
+    "modified_header": "Modified",
+    "files_tab": "Files",
+    "duplicates_tab": "Duplicates",
+    "costs_tab": "Costs",
+    "hash_header": "Hash",
+    "copies_header": "Copies", 
+    "savings_header": "Savings",
+    "files_header": "Files",
+    "storage_header": "Storage",
+    "monthly_cost_header": "Monthly Cost",
+    "more_files_suffix": "... and {{count}} more files",
+    "export_simulation_note": "Export {{format}} - This is a simulation. No actual export is performed.",
     "heuristics": {
       "cold_file_threshold": "Cold file threshold: {{days}} days",
       "large_file_threshold": "Large file threshold: {{size}}",
@@ -181,6 +209,10 @@
     "done": "Done",
     "cancel": "Cancel",
     "close": "Close"
+  },
+  "errors": {
+    "loading_data_title": "Error Loading Data",
+    "reload_button": "Reload Application"
   },
   "glossary": {
     "duplicate": "Two or more files that are exactly the same.",

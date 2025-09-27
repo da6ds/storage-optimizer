@@ -1,5 +1,5 @@
 import { Switch, Route } from 'wouter';
-import { useSimulation, useRouting } from '../contexts/SimulationContext';
+import { useSimulation, useRouting, useI18n } from '../contexts/SimulationContext';
 import SimulationOnboarding from './SimulationOnboarding';
 import SimulationBottomNav from './SimulationBottomNav';
 import MapView from './views/MapView';
@@ -14,6 +14,7 @@ import LoadingScreen from './LoadingScreen';
 export default function SimulationApp() {
   const { onboardingComplete, isLoading, error } = useSimulation();
   const { getDefaultRoute } = useRouting();
+  const { t } = useI18n();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -23,13 +24,13 @@ export default function SimulationApp() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center space-y-4">
-          <h1 className="text-xl font-semibold text-destructive">Error Loading Data</h1>
+          <h1 className="text-xl font-semibold text-destructive">{t('errors.loading_data_title')}</h1>
           <p className="text-muted-foreground">{error}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
-            Reload Application
+            {t('errors.reload_button')}
           </button>
         </div>
       </div>
@@ -46,8 +47,8 @@ export default function SimulationApp() {
       <header className="flex-none border-b bg-card">
         <div className="flex items-center justify-between p-3 md:p-4">
           <div>
-            <h1 className="text-lg font-semibold">File Inventory Optimizer</h1>
-            <p className="text-xs text-muted-foreground">Simulation Mode</p>
+            <h1 className="text-lg font-semibold">{t('app.title')}</h1>
+            <p className="text-xs text-muted-foreground">{t('app.simulation_mode')}</p>
           </div>
           <ModeGoalIndicator />
         </div>

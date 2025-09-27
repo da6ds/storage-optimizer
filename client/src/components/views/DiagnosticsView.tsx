@@ -13,7 +13,7 @@ export default function DiagnosticsView() {
   const handleExport = (format: string) => {
     // In a real implementation, this would generate and download files
     console.log(`Exporting data in ${format} format`);
-    alert(`Export ${format} - This is a simulation. No actual export is performed.`);
+    alert(t('diagnostics.export_simulation_note', { format }));
   };
 
   return (
@@ -26,8 +26,8 @@ export default function DiagnosticsView() {
       {/* Export buttons */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Export Options</CardTitle>
-          <CardDescription>Download raw data and reports</CardDescription>
+          <CardTitle className="text-base">{t('diagnostics.export_options_title')}</CardTitle>
+          <CardDescription>{t('diagnostics.export_options_subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-2">
@@ -75,20 +75,20 @@ export default function DiagnosticsView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t('diagnostics.heuristics_title')}</CardTitle>
-          <CardDescription>Algorithm settings and thresholds</CardDescription>
+          <CardDescription>{t('diagnostics.heuristics_subtitle')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="text-sm">
-            <Badge variant="outline" className="mr-2">Cold Files</Badge>
-            Files not modified in 180+ days and ≥1GB
+            <Badge variant="outline" className="mr-2">{t('diagnostics.cold_files_label')}</Badge>
+            {t('diagnostics.cold_files_desc')}
           </div>
           <div className="text-sm">
-            <Badge variant="outline" className="mr-2">Duplicates</Badge>
-            Hash-based content matching across providers
+            <Badge variant="outline" className="mr-2">{t('diagnostics.duplicates_label')}</Badge>
+            {t('diagnostics.duplicates_desc')}
           </div>
           <div className="text-sm">
-            <Badge variant="outline" className="mr-2">Cost Optimization</Badge>
-            Keep files on cheapest provider when duplicated
+            <Badge variant="outline" className="mr-2">{t('diagnostics.cost_optimization_label')}</Badge>
+            {t('diagnostics.cost_optimization_desc')}
           </div>
         </CardContent>
       </Card>
@@ -96,24 +96,24 @@ export default function DiagnosticsView() {
       {/* Raw data tables */}
       <Tabs defaultValue="files" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="files">Files ({files.length.toLocaleString()})</TabsTrigger>
-          <TabsTrigger value="duplicates">Duplicates ({duplicateClusters.length})</TabsTrigger>
-          <TabsTrigger value="costs">Costs ({storageBreakdown.length})</TabsTrigger>
+          <TabsTrigger value="files">{t('diagnostics.files_tab')} ({files.length.toLocaleString()})</TabsTrigger>
+          <TabsTrigger value="duplicates">{t('diagnostics.duplicates_tab')} ({duplicateClusters.length})</TabsTrigger>
+          <TabsTrigger value="costs">{t('diagnostics.costs_tab')} ({storageBreakdown.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="files">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t('diagnostics.files_table_title')}</CardTitle>
-              <CardDescription>Complete file inventory across all providers</CardDescription>
+              <CardDescription>{t('diagnostics.files_table_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-auto">
                 <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground border-b pb-2 sticky top-0 bg-background">
-                  <div>Provider</div>
-                  <div>Path</div>
-                  <div className="text-right">Size</div>
-                  <div className="text-right">Modified</div>
+                  <div>{t('diagnostics.provider_header')}</div>
+                  <div>{t('diagnostics.path_header')}</div>
+                  <div className="text-right">{t('diagnostics.size_header')}</div>
+                  <div className="text-right">{t('diagnostics.modified_header')}</div>
                 </div>
                 {files.slice(0, 100).map((file) => (
                   <div key={file.id} className="grid grid-cols-4 gap-2 text-xs">
@@ -125,7 +125,7 @@ export default function DiagnosticsView() {
                 ))}
                 {files.length > 100 && (
                   <div className="text-center py-2 text-sm text-muted-foreground">
-                    ... and {(files.length - 100).toLocaleString()} more files
+                    {t('diagnostics.more_files_suffix', { count: (files.length - 100).toLocaleString() })}
                   </div>
                 )}
               </div>
@@ -137,15 +137,15 @@ export default function DiagnosticsView() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t('diagnostics.duplicates_table_title')}</CardTitle>
-              <CardDescription>Duplicate file clusters with savings potential</CardDescription>
+              <CardDescription>{t('diagnostics.duplicates_table_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-auto">
                 <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
-                  <div>Hash</div>
-                  <div className="text-right">Copies</div>
-                  <div className="text-right">Size</div>
-                  <div className="text-right">Savings</div>
+                  <div>{t('diagnostics.hash_header')}</div>
+                  <div className="text-right">{t('diagnostics.copies_header')}</div>
+                  <div className="text-right">{t('diagnostics.size_header')}</div>
+                  <div className="text-right">{t('diagnostics.savings_header')}</div>
                 </div>
                 {duplicateClusters.map((cluster) => (
                   <div key={cluster.hash} className="grid grid-cols-4 gap-2 text-xs">
@@ -164,15 +164,15 @@ export default function DiagnosticsView() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t('diagnostics.costs_table_title')}</CardTitle>
-              <CardDescription>Detailed cost breakdown by provider</CardDescription>
+              <CardDescription>{t('diagnostics.costs_table_subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
-                  <div>Provider</div>
-                  <div className="text-right">Files</div>
-                  <div className="text-right">Storage</div>
-                  <div className="text-right">Monthly Cost</div>
+                  <div>{t('diagnostics.provider_header')}</div>
+                  <div className="text-right">{t('diagnostics.files_header')}</div>
+                  <div className="text-right">{t('diagnostics.storage_header')}</div>
+                  <div className="text-right">{t('diagnostics.monthly_cost_header')}</div>
                 </div>
                 {storageBreakdown.map((provider) => (
                   <div key={provider.provider} className="grid grid-cols-4 gap-2 text-xs">
