@@ -12,12 +12,39 @@ import YAML from 'yaml';
 
 export type UserMode = 'easy' | 'standard' | 'pro';
 export type UserGoal = 'view' | 'suggest' | 'plan';
+export type SubscriptionTier = 'free' | 'pro';
+export type SubscriptionPlan = 'one_time' | 'monthly';
+
+export interface SubscriptionState {
+  tier: SubscriptionTier;
+  plan: SubscriptionPlan | null;
+  isActive: boolean;
+  expiresAt: Date | null;
+}
+
+// Plan metadata constants
+export const SUBSCRIPTION_PLANS = {
+  one_time: {
+    priceUsd: 10,
+    label: "Clean it once",
+    description: "$10 one-time"
+  },
+  monthly: {
+    priceUsd: 5,
+    periodDays: 30,
+    label: "Keep it optimized", 
+    description: "$5/month"
+  }
+} as const;
 
 interface SimulationState {
   // User configuration
   mode: UserMode | null;
   goal: UserGoal | null;
   onboardingComplete: boolean;
+  
+  // Subscription management
+  subscription: SubscriptionState;
   
   // Data
   files: SimulatedFile[];
@@ -39,6 +66,13 @@ interface SimulationActions {
   completeOnboarding: () => void;
   refreshData: () => Promise<void>;
   resetOnboarding: () => void;
+  
+  // Subscription actions
+  upgradeToOneTime: () => void;
+  upgradeToMonthly: () => void;
+  cancelSubscription: () => void;
+  isProUser: () => boolean;
+  getPotentialSavings: () => number;
 }
 
 type SimulationContextType = SimulationState & SimulationActions;
@@ -54,6 +88,12 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     mode: null,
     goal: null,
     onboardingComplete: false,
+    subscription: {
+      tier: 'free',
+      plan: null,
+      isActive: false,
+      expiresAt: null
+    },
     files: [],
     pricingConfig: null,
     duplicateClusters: [],
@@ -74,6 +114,27 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
       computeDerivedData();
     }
   }, [state.files, state.pricingConfig]);
+
+  // Enforce monthly subscription expiration
+  useEffect(() => {
+    if (state.subscription.plan === 'monthly' && 
+        state.subscription.isActive && 
+        state.subscription.expiresAt) {
+      const now = new Date();
+      if (now > state.subscription.expiresAt) {
+        // Auto-expire monthly subscription - reset to free tier
+        setState(prev => ({
+          ...prev,
+          subscription: {
+            tier: 'free',
+            plan: null,
+            isActive: false,
+            expiresAt: null
+          }
+        }));
+      }
+    }
+  }, [state.subscription]);
 
   const loadSimulationData = async () => {
     try {
@@ -153,13 +214,78 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     await loadSimulationData();
   };
 
+  // Subscription management actions
+  const upgradeToOneTime = () => {
+    setState(prev => ({
+      ...prev,
+      subscription: {
+        tier: 'pro',
+        plan: 'one_time',
+        isActive: true,
+        expiresAt: null // One-time purchases don't expire
+      }
+    }));
+  };
+
+  const upgradeToMonthly = () => {
+    const now = new Date();
+    const daysInMs = SUBSCRIPTION_PLANS.monthly.periodDays * 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(now.getTime() + daysInMs);
+    setState(prev => ({
+      ...prev,
+      subscription: {
+        tier: 'pro',
+        plan: 'monthly',
+        isActive: true,
+        expiresAt
+      }
+    }));
+  };
+
+  const cancelSubscription = () => {
+    setState(prev => ({
+      ...prev,
+      subscription: {
+        tier: 'free',
+        plan: null,
+        isActive: false,
+        expiresAt: null
+      }
+    }));
+  };
+
+  const isProUser = (): boolean => {
+    if (state.subscription.tier !== 'pro' || !state.subscription.isActive) {
+      return false;
+    }
+    
+    // Check expiration for monthly subscriptions (pure check, no state mutation)
+    if (state.subscription.plan === 'monthly' && state.subscription.expiresAt) {
+      const now = new Date();
+      if (now > state.subscription.expiresAt) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const getPotentialSavings = (): number => {
+    return state.optimizationActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+  };
+
   const contextValue: SimulationContextType = {
     ...state,
     setUserMode,
     setUserGoal,
     completeOnboarding,
     refreshData,
-    resetOnboarding
+    resetOnboarding,
+    upgradeToOneTime,
+    upgradeToMonthly,
+    cancelSubscription,
+    isProUser,
+    getPotentialSavings
   };
 
   return (
