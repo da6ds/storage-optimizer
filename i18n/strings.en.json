@@ -6,31 +6,33 @@
     "simulation_mode": "Simulation Mode"
   },
   "onboarding": {
-    "title": "Let's get started",
-    "subtitle": "Two quick questions to customize your experience",
-    "q_familiarity": "How familiar are you with file storage & cloud services?",
+    "title": "See it all. Clean it all.",
+    "subtitle": "Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.",
+    "q_familiarity": "Familiarity",
     "familiarity": {
-      "easy": "I'm not technical",
-      "standard": "I'm comfortable with tech", 
-      "pro": "I work with systems/code"
+      "easy": "Easy",
+      "standard": "Standard", 
+      "pro": "Pro"
     },
     "familiarity_help": {
-      "easy": "We'll keep things simple with clear recommendations",
-      "standard": "We'll show you options with helpful context",
-      "pro": "We'll give you full transparency and detailed controls"
+      "easy": "Simple view with clear recommendations",
+      "standard": "Balanced view with helpful details",
+      "pro": "Full technical details and controls"
     },
-    "q_goal": "What do you want to do today?",
+    "q_goal": "Goal",
     "goal": {
-      "view": "Just show me where my stuff is",
-      "suggest": "Recommend ways to save money",
-      "plan": "Create a step-by-step plan to do it for me (simulation only)"
+      "view": "View only",
+      "suggest": "Suggestions",
+      "plan": "Plan"
     },
     "goal_help": {
-      "view": "Explore your file distribution across providers",
-      "suggest": "Get actionable cost-saving recommendations",
-      "plan": "Generate a detailed optimization checklist"
+      "view": "Just show me what I have",
+      "suggest": "Show me ways to save money",
+      "plan": "Make a plan to optimize everything"
     },
-    "button_continue": "Continue"
+    "button_next": "Continue",
+    "button_continue": "Continue → See My Storage",
+    "upgrade_footnote": "Upgrade later to let the app fix it all for you."
   },
   "navigation": {
     "map": "Map",

@@ -19,7 +19,7 @@ export default function SimulationOnboarding() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('labels.loading')}</p>
         </div>
       </div>
     );
@@ -86,9 +86,6 @@ export default function SimulationOnboarding() {
               <div className="space-y-4">
                 <div>
                   <CardTitle className="text-lg">{t('onboarding.q_familiarity')}</CardTitle>
-                  <CardDescription className="mt-1">
-                    This helps us customize your experience
-                  </CardDescription>
                 </div>
 
                 <RadioGroup 
@@ -124,9 +121,6 @@ export default function SimulationOnboarding() {
               <div className="space-y-4">
                 <div>
                   <CardTitle className="text-lg">{t('onboarding.q_goal')}</CardTitle>
-                  <CardDescription className="mt-1">
-                    What would you like to focus on today?
-                  </CardDescription>
                 </div>
 
                 <RadioGroup 
@@ -175,7 +169,7 @@ export default function SimulationOnboarding() {
               disabled={!canContinue}
               data-testid="button-onboarding-continue"
             >
-              {step === 2 ? t('labels.done') : t('onboarding.button_continue')}
+              {step === 2 ? t('onboarding.button_continue') : t('onboarding.button_next')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -183,7 +177,7 @@ export default function SimulationOnboarding() {
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            File Inventory Optimizer - Simulation Mode
+            {t('onboarding.upgrade_footnote')}
           </p>
         </div>
       </div>
