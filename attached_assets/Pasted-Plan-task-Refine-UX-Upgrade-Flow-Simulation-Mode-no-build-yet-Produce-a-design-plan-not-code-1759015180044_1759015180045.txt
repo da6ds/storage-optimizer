@@ -1,0 +1,69 @@
+Plan task: Refine UX & Upgrade Flow (Simulation Mode — no build yet)
+Produce a design plan, not code. Focus on onboarding, free vs. pro tier differentiation, navigation, upgrade flows, and cross-device responsiveness.
+Tone & Copy Requirement (important):
+All copy across the app must be extremely straightforward, plain, and easy to understand.
+No jargon. No clever wordplay. Always say exactly what’s happening, why it matters, and what the user should do next.
+Copy must work for all audiences: an 80-year-old non-technical user, a Gen Z phone-native, and a 35-year-old backend engineer.
+Onboarding (1 page, 2 questions)
+Headline: “See it all. Clean it all.”
+Subcopy: “Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.”
+Question 1: Familiarity (Easy, Standard, Pro).
+Question 2: Goal (View only, Suggestions, Plan).
+Bottom CTA: “Continue → See My Storage”.
+Small note under CTA: “Upgrade later to let the app fix it all for you.”
+Navigation (always the same)
+Bottom tabs: Map · Duplicates · Costs · Actions.
+Top-right gear icon → Settings (Plan, History, Upgrade/Downgrade).
+Free tier experience
+Populate all tabs (Map, Duplicates, Costs, Actions) with simulated data.
+At the top of each tab, show a big “Estimated Savings” banner (from simulated calculations).
+Under every banner: Upgrade CTA → “Start saving now.”
+Actions tab: keep it very simple. Show a handful of descriptive recommendations (e.g. “Remove duplicate photos across Google Drive and iCloud”). Each item shows type of dupe, estimated $/mo savings, and a clear explanation.
+Recommended action: always highlighted (based on cost, storage savings, and simplicity).
+All upgrade CTAs should route to the same Upgrade flow.
+Upgrade flow (Pro tier)
+Simple subscription choices:
+One-time $10 “Clean it once.”
+$5/month “Keep it optimized.”
+Once upgraded:
+User can actually select actions.
+Show a step-by-step plan (e.g. “Remove 120 duplicate photos from Drive, move 4 videos >1GB to iCloud archive”).
+Let them select/unselect actions.
+Show a final confirmation screen.
+Optional upsell: pay for a backup of deleted files.
+After confirmation: show a progress UI, then “Done” with a summary + savings estimate.
+Pro tier account features
+History tab in Settings: past actions, storage/cost trend.
+Account plan management: upgrade/downgrade.
+Notifications toggle (for ongoing monitoring if subscribed).
+Cross-device UX (mobile → iPad → web)
+Mobile (primary):
+Bottom nav tabs, sticky primary CTA, 44px+ tap targets.
+Fast transitions, minimal typing, table fallbacks for charts.
+iPad:
+Use split-view where possible (left nav list, right detail).
+Expand charts and tables to take advantage of space.
+Still show upgrade CTA clearly.
+Web/desktop:
+Centered layout, responsive grid with more columns.
+Keyboard navigation and larger charts.
+All form factors: Must feel sharp, lightweight, and fast — no laggy animations, no clutter. Layout must resize gracefully across breakpoints.
+Accessibility & simplicity
+Actions tab must not overwhelm. Descriptions in plain English.
+Always include a “What this means” section under charts/tables.
+Color-blind-safe palette, WCAG AA minimum.
+VoiceOver/TalkBack/Screen Reader friendly with ARIA summaries for every chart.
+Deliverables (Plan, not code)
+/docs/ux-flow.md — user journey from onboarding → free tier → upgrade → pro tier.
+/docs/upgrade-flow.md — step-by-step for upgrade, action selection, backup upsell.
+/docs/navigation.md — consistent nav + settings structure.
+/docs/responsive.md — breakpoints and layout behaviors for mobile, iPad, web.
+Wireframe sketches (text-based if needed) showing each tab in free vs. pro.
+Example copy blocks for every screen and CTA, written in extremely straightforward, plain language.
+Acceptance for this plan task
+Produce clear documentation of flows, not implementation.
+Show wireframe-level layouts for onboarding, tabs, and upgrade flow.
+Call out where upgrade CTAs appear and how they behave in free vs. pro.
+Provide suggested copy for each page and button that is direct, simple, and obvious.
+Document how layouts adapt across mobile, iPad, and web.
+Make sure every design choice emphasizes simplicity, clarity, and one-tap upgrade.
