@@ -327,32 +327,92 @@ function VisualMapView({
         </div>
 
         {/* Connection Lines */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none text-muted-foreground" style={{ zIndex: 0 }}>
-          {/* Cloud connections */}
+        <svg className="absolute inset-0 w-full h-full text-muted-foreground" style={{ zIndex: 0, pointerEvents: 'auto' }}>
+          {/* Sync/Backup relationships - solid lines from devices to clouds */}
+          {devices.map((device, deviceIndex) => 
+            clouds.map((cloud, cloudIndex) => {
+              // Create sync relationship for demonstration - device 0 syncs to cloud 0, device 1 to cloud 1, etc
+              const hasSync = deviceIndex === cloudIndex || (deviceIndex === 0 && cloudIndex === 1); // iPhone syncs to both Google Drive and Dropbox
+              if (!hasSync) return null;
+              
+              return (
+                <line
+                  key={`sync-${device.id}-${cloud.provider}`}
+                  x1={`${50 + (deviceIndex - devices.length/2 + 0.5) * 20}%`}
+                  y1="70%" // slightly above device position
+                  x2={`${50 + (cloudIndex - clouds.length/2 + 0.5) * 20}%`}
+                  y2="30%" // slightly below cloud position
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  style={{ 
+                    opacity: 0.4,
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.target.style.opacity = '0.7'; }}
+                  onMouseLeave={(e) => { e.target.style.opacity = '0.4'; }}
+                  data-testid={`sync-line-${device.id}-${cloud.provider}`}
+                />
+              );
+            })
+          ).flat().filter(Boolean)}
+          
+          {/* Duplicate arcs - curved dotted lines between clouds with duplicates */}
+          {clouds.map((cloud1, index1) => 
+            clouds.slice(index1 + 1).map((cloud2, index2) => {
+              const cloud2Index = index1 + index2 + 1;
+              const x1 = 50 + (index1 - clouds.length/2 + 0.5) * 20;
+              const x2 = 50 + (cloud2Index - clouds.length/2 + 0.5) * 20;
+              const y = 25;
+              const midX = (x1 + x2) / 2;
+              const midY = y - 8; // Arc above the clouds
+              
+              return (
+                <path
+                  key={`duplicate-${cloud1.provider}-${cloud2.provider}`}
+                  d={`M ${x1}% ${y}% Q ${midX}% ${midY}% ${x2}% ${y}%`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeDasharray="3,3"
+                  style={{ 
+                    opacity: 0.5,
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.target.style.opacity = '0.8'; }}
+                  onMouseLeave={(e) => { e.target.style.opacity = '0.5'; }}
+                  data-testid={`duplicate-arc-${cloud1.provider}-${cloud2.provider}`}
+                />
+              );
+            })
+          ).flat()}
+          
+          {/* Basic connections from center to all nodes */}
           {clouds.map((_, index) => (
             <line
-              key={`cloud-${index}`}
+              key={`center-cloud-${index}`}
               x1="50%"
               y1="50%"
               x2={`${50 + (index - clouds.length/2 + 0.5) * 20}%`}
               y2="25%"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="1"
               strokeDasharray="5,5"
-              opacity="0.6"
+              opacity="0.3"
             />
           ))}
-          {/* Device connections */}
           {devices.map((_, index) => (
             <line
-              key={`device-${index}`}
+              key={`center-device-${index}`}
               x1="50%"
               y1="50%"
               x2={`${50 + (index - devices.length/2 + 0.5) * 20}%`}
               y2="75%"
               stroke="currentColor"
-              strokeWidth="3"
-              opacity="0.8"
+              strokeWidth="1"
+              strokeDasharray="5,5"
+              opacity="0.3"
             />
           ))}
         </svg>
