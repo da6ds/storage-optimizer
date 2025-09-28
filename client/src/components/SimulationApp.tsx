@@ -16,10 +16,27 @@ import UpgradeFlow from './upgrade/UpgradeFlow';
 import SettingsPage from './pages/SettingsPage';
 
 export default function SimulationApp() {
+  // ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS (Rules of Hooks)
   const { onboardingComplete, isLoading, error, showDetails, toggleDetails, mode, goal, setUserMode, setUserGoal, completeOnboarding } = useSimulation();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
+  
+  // Skip modal onboarding - users interact with persistent checklist instead
+  // Set default mode/goal and mark onboarding complete if not set to ensure app functionality
+  useEffect(() => {
+    if (!mode) {
+      setUserMode('standard'); // Default to standard mode
+    }
+    if (!goal) {
+      setUserGoal('suggest'); // Default to suggest goal
+    }
+    if (!onboardingComplete) {
+      // Mark onboarding complete since we use persistent checklist
+      completeOnboarding();
+    }
+  }, [mode, goal, onboardingComplete]); // Remove function dependencies to fix hooks ordering
 
+  // NOW early returns are safe since all hooks are called above
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -40,21 +57,6 @@ export default function SimulationApp() {
       </div>
     );
   }
-
-  // Skip modal onboarding - users interact with persistent checklist instead
-  // Set default mode/goal and mark onboarding complete if not set to ensure app functionality
-  useEffect(() => {
-    if (!mode) {
-      setUserMode('standard'); // Default to standard mode
-    }
-    if (!goal) {
-      setUserGoal('suggest'); // Default to suggest goal
-    }
-    if (!onboardingComplete) {
-      // Mark onboarding complete since we use persistent checklist
-      completeOnboarding();
-    }
-  }, [mode, goal, onboardingComplete, setUserMode, setUserGoal, completeOnboarding]);
 
   return (
     <div className="h-screen flex flex-col bg-background">

@@ -7,11 +7,30 @@ import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function CostsView() {
-  const { storageBreakdown, mode } = useSimulation();
+  const { storageBreakdown, mode, pricingConfig } = useSimulation();
   const { t } = useI18n();
 
   const totalCost = storageBreakdown.reduce((sum, p) => sum + p.estimated_monthly_cost, 0);
   const maxCost = Math.max(...storageBreakdown.map(p => p.estimated_monthly_cost));
+
+  // Helper function to get plan info for a provider
+  const getProviderPlan = (provider: string): string => {
+    if (!pricingConfig) return '';
+    
+    // Normalize provider key to match pricing config
+    const providerMap: Record<string, string> = {
+      'drive': 'google_drive',
+      'google_drive': 'google_drive',
+      'dropbox': 'dropbox',
+      'onedrive': 'onedrive',
+      'icloud': 'icloud',
+      'local': 'local'
+    };
+    
+    const normalizedProvider = providerMap[provider.toLowerCase()] || provider;
+    const pricing = pricingConfig.providers[normalizedProvider];
+    return pricing?.plan || '';
+  };
 
   return (
     <div className="h-full overflow-auto p-4 space-y-4">
@@ -79,6 +98,11 @@ export default function CostsView() {
                       <div className="text-xs text-muted-foreground">
                         {provider.total_files.toLocaleString()} files
                       </div>
+                      {getProviderPlan(provider.provider) && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {getProviderPlan(provider.provider)}
+                        </div>
+                      )}
                     </div>
                     <div className="text-right text-sm">
                       {formatFileSize(provider.total_size_gb * 1024 * 1024 * 1024)}
