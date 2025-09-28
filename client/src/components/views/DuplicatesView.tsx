@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight, Copy, Image, Video, FileText } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
@@ -41,8 +42,9 @@ const categorizeDuplicates = (clusters: DuplicateCluster[]) => {
 };
 
 export default function DuplicatesView() {
-  const { duplicateClusters, mode, showDetails } = useSimulation();
+  const { duplicateClusters, mode, showDetails, shouldShowSavings, getGatingMessage, getNextGatingStep } = useSimulation();
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['photos', 'videos', 'other']));
 
@@ -51,6 +53,10 @@ export default function DuplicatesView() {
   
   // Categorize duplicates by type
   const categorizedDuplicates = categorizeDuplicates(duplicateClusters);
+
+  // Check if duplicate data should be shown based on setup completion
+  const canShowDuplicates = shouldShowSavings();
+  const gatingMessage = getGatingMessage();
 
   const toggleCluster = (hash: string) => {
     const newExpanded = new Set(expandedClusters);
@@ -85,7 +91,41 @@ export default function DuplicatesView() {
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />
 
-      {/* Redundancy Safety Banner */}
+      {/* TODO: Add proper data gating for duplicates view */}
+      {!canShowDuplicates && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Duplicate Files</CardTitle>
+            <CardDescription>Find and remove duplicate files to save space</CardDescription>
+          </CardHeader>
+          <CardContent className="text-center py-8 space-y-4">
+            <Copy className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                {gatingMessage || "Connect your devices and cloud accounts to find duplicate files"}
+              </p>
+              <Button
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    setLocation('/connect/device');
+                  } else if (nextStep === 'cloud') {
+                    setLocation('/connect/cloud');
+                  }
+                }}
+                data-testid="button-connect-for-duplicates"
+              >
+                {getNextGatingStep() === 'device' ? "Connect this device" : "Connect cloud accounts"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Duplicate content - only show when setup is complete */}
+      {canShowDuplicates && (
+        <>
+          {/* Redundancy Safety Banner */}
       <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">

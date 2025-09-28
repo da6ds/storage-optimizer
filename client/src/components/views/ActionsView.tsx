@@ -10,7 +10,7 @@ import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function ActionsView() {
-  const { mode, isProUser, showDetails, getRealisticOptimizationActions } = useSimulation();
+  const { mode, isProUser, showDetails, getRealisticOptimizationActions, shouldShowSavings, getGatingMessage, getNextGatingStep } = useSimulation();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
   
@@ -46,6 +46,10 @@ export default function ActionsView() {
     }
   };
 
+  // Check if actions should be shown based on setup completion
+  const canShowActions = shouldShowSavings();
+  const gatingMessage = getGatingMessage();
+
   return (
     <div className="h-full overflow-auto p-4 space-y-4">
       <div className="space-y-2">
@@ -58,6 +62,38 @@ export default function ActionsView() {
 
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />
+
+      {/* Show gated empty state if setup isn't complete */}
+      {!canShowActions ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Optimization Actions</CardTitle>
+            <CardDescription>Recommendations to save money and storage</CardDescription>
+          </CardHeader>
+          <CardContent className="text-center py-8 space-y-4">
+            <Zap className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                {gatingMessage || "Connect your devices and cloud accounts to see optimization recommendations"}
+              </p>
+              <Button
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    setLocation('/connect/device');
+                  } else if (nextStep === 'cloud') {
+                    setLocation('/connect/cloud');
+                  }
+                }}
+                data-testid="button-connect-for-actions"
+              >
+                {getNextGatingStep() === 'device' ? "Connect this device" : "Connect cloud accounts"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
 
       {/* Total savings potential - always show in simulation */}
       {totalSavings > 0 && (
@@ -267,6 +303,8 @@ export default function ActionsView() {
           </p>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }

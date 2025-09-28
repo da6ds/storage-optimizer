@@ -1,14 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { DollarSign } from 'lucide-react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
+import { useLocation } from 'wouter';
 
 export default function CostsView() {
-  const { storageBreakdown, mode, pricingConfig, showDetails } = useSimulation();
+  const { storageBreakdown, mode, pricingConfig, showDetails, shouldShowSavings, getGatingMessage, getNextGatingStep } = useSimulation();
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
 
   const totalCost = storageBreakdown.reduce((sum, p) => sum + p.estimated_monthly_cost, 0);
   const maxCost = Math.max(...storageBreakdown.map(p => p.estimated_monthly_cost));
@@ -32,6 +35,10 @@ export default function CostsView() {
     return pricing?.plan || '';
   };
 
+  // Check if cost data should be shown based on setup completion
+  const canShowCosts = shouldShowSavings();
+  const gatingMessage = getGatingMessage();
+
   return (
     <div className="h-full overflow-auto p-4 space-y-4">
       <div className="space-y-2">
@@ -45,8 +52,39 @@ export default function CostsView() {
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />
 
-      {/* Total cost summary */}
-      <Card>
+      {/* Show gated empty state if setup isn't complete */}
+      {!canShowCosts ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Cost Analysis</CardTitle>
+            <CardDescription>Monthly storage costs by provider</CardDescription>
+          </CardHeader>
+          <CardContent className="text-center py-8 space-y-4">
+            <DollarSign className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                {gatingMessage || "Connect your devices and cloud accounts to see cost analysis"}
+              </p>
+              <Button
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    setLocation('/connect/device');
+                  } else if (nextStep === 'cloud') {
+                    setLocation('/connect/cloud');
+                  }
+                }}
+                data-testid="button-connect-for-costs"
+              >
+                {getNextGatingStep() === 'device' ? "Connect this device" : "Connect cloud accounts"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Total cost summary */}
+          <Card>
         <CardContent className="p-4 text-center">
           <div className="text-3xl font-bold">{formatCurrency(totalCost)}</div>
           <div className="text-sm text-muted-foreground">{t('costs.total_monthly')}</div>
@@ -143,6 +181,8 @@ export default function CostsView() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
