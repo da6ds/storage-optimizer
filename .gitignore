@@ -1,6 +1,9 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+node_modules/
+out/
+data/fake/
+dist/
+*.log
+.env
+*.local
+.replit
+*.replit
