@@ -1,4 +1,5 @@
 import { Switch, Route, useLocation } from 'wouter';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useSimulation, useRouting, useI18n } from '../contexts/SimulationContext';
@@ -97,15 +98,18 @@ export default function SimulationApp() {
 
 function RedirectToDefault() {
   const { getDefaultRoute } = useRouting();
+  const [location, setLocation] = useLocation();
   
-  // Simple redirect using window.location
-  // In a more complex app, you might use wouter's useLocation hook
+  // Use wouter navigation instead of window.location.reload to avoid full page reload
   const defaultRoute = getDefaultRoute();
   
-  if (window.location.pathname !== defaultRoute) {
-    window.history.replaceState(null, '', defaultRoute);
-    window.location.reload();
-  }
+  // Fix: useEffect must be called unconditionally at top level (Rules of Hooks)
+  useEffect(() => {
+    if (location !== defaultRoute) {
+      // Use replace: true to avoid back button loops
+      setLocation(defaultRoute, { replace: true });
+    }
+  }, [defaultRoute, location, setLocation]);
   
   return null;
 }

@@ -103,6 +103,39 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     error: null
   });
 
+  // Restore subscription and onboarding state from localStorage on mount
+  useEffect(() => {
+    try {
+      // Restore subscription state
+      const savedSubscription = localStorage.getItem('simulation_subscription');
+      if (savedSubscription) {
+        const parsed = JSON.parse(savedSubscription);
+        // Convert expiresAt string back to Date if it exists
+        if (parsed.expiresAt) {
+          parsed.expiresAt = new Date(parsed.expiresAt);
+        }
+        // Only update if different from default state
+        if (parsed.tier !== 'free' || parsed.isActive) {
+          setState(prev => ({
+            ...prev,
+            subscription: parsed
+          }));
+        }
+      }
+
+      // Restore onboarding completion state
+      const savedOnboarding = localStorage.getItem('simulation_onboarding_complete');
+      if (savedOnboarding === 'true') {
+        setState(prev => ({
+          ...prev,
+          onboardingComplete: true
+        }));
+      }
+    } catch (error) {
+      console.warn('Failed to restore app state:', error);
+    }
+  }, []); // Run only on mount
+
   // Load initial data
   useEffect(() => {
     loadSimulationData();
@@ -114,6 +147,34 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
       computeDerivedData();
     }
   }, [state.files, state.pricingConfig]);
+
+  // Persist subscription state to localStorage when it changes
+  useEffect(() => {
+    try {
+      // Fix: Always handle persistence - remove when free/inactive, save when Pro/active
+      if (state.subscription.tier === 'free' && !state.subscription.isActive) {
+        localStorage.removeItem('simulation_subscription');
+      } else {
+        localStorage.setItem('simulation_subscription', JSON.stringify(state.subscription));
+      }
+    } catch (error) {
+      console.warn('Failed to persist subscription state:', error);
+    }
+  }, [state.subscription]);
+
+  // Persist onboarding completion state to localStorage when it changes
+  useEffect(() => {
+    try {
+      // Fix: Remove from localStorage when onboarding is reset, save when completed
+      if (state.onboardingComplete) {
+        localStorage.setItem('simulation_onboarding_complete', 'true');
+      } else {
+        localStorage.removeItem('simulation_onboarding_complete');
+      }
+    } catch (error) {
+      console.warn('Failed to persist onboarding state:', error);
+    }
+  }, [state.onboardingComplete]);
 
   // Enforce monthly subscription expiration
   useEffect(() => {
