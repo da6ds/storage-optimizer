@@ -1,3 +1,4 @@
+**License:** All rights reserved. Portfolio review only. No copying or reuse without permission.
 # StorageMap (Simulation)
 **See it all. Clean it all.**  
 Link your device and cloud accounts to see every file in one place. Then let the app clean it up and cut storage costs — automatically.
