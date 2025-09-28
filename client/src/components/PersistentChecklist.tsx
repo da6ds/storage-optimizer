@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,10 +25,9 @@ interface ChecklistItem {
 
 export default function PersistentChecklist() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [, setLocation] = useLocation();
   const { 
     checklist, 
-    markDeviceLinked, 
-    markCloudAccountsLinked, 
     markOptimizeRun,
     isChecklistComplete,
     refreshData 
@@ -39,14 +39,14 @@ export default function PersistentChecklist() {
       title: 'Link this device',
       description: 'Grant local scan permission',
       icon: Smartphone,
-      action: markDeviceLinked
+      action: () => setLocation('/connect/device')
     },
     {
       id: 'cloudAccountsLinked',
       title: 'Link cloud accounts',
       description: 'Drive, iCloud, OneDrive, Dropbox',
       icon: Cloud,
-      action: markCloudAccountsLinked
+      action: () => setLocation('/connect/cloud')
     },
     {
       id: 'optimizeRun',

@@ -14,6 +14,8 @@ import PlanView from './views/PlanView';
 import LoadingScreen from './LoadingScreen';
 import UpgradeFlow from './upgrade/UpgradeFlow';
 import SettingsPage from './pages/SettingsPage';
+import DeviceConnectionPage from './pages/DeviceConnectionPage';
+import CloudConnectionPage from './pages/CloudConnectionPage';
 
 export default function SimulationApp() {
   // ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS (Rules of Hooks)
@@ -93,6 +95,8 @@ export default function SimulationApp() {
           <Route path="/settings" component={SettingsPage} />
           <Route path="/upgrade" component={UpgradeFlow} />
           <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
+          <Route path="/connect/device" component={DeviceConnectionPage} />
+          <Route path="/connect/cloud" component={CloudConnectionPage} />
           <Route path="/map" component={MapView} />
           <Route path="/duplicates" component={DuplicatesView} />
           <Route path="/costs" component={CostsView} />

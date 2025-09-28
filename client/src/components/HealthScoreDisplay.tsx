@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { HelpCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useSimulation, useI18n } from '../contexts/SimulationContext';
 
 export default function HealthScoreDisplay() {
-  const { getHealthScore, showDetails, shouldShowScore, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
+  const { getHealthScore, showDetails, shouldShowScore, getGatingMessage, getNextGatingStep } = useSimulation();
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
   const [showExplainer, setShowExplainer] = useState(false);
 
   const score = getHealthScore();
@@ -78,12 +80,12 @@ export default function HealthScoreDisplay() {
             variant="outline"
             size="sm"
             onClick={() => {
-              // Use robust gating step detection
+              // Navigate to the appropriate connection flow
               const nextStep = getNextGatingStep();
               if (nextStep === 'device') {
-                markDeviceLinked();
+                setLocation('/connect/device');
               } else if (nextStep === 'cloud') {
-                markCloudAccountsLinked();
+                setLocation('/connect/cloud');
               }
             }}
             className="w-full text-sm"

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BarChart3, Table, Network, List, Smartphone, Monitor, HardDrive, Cloud } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
@@ -115,7 +116,8 @@ function ListMapView({
   mode: string | null;
 }) {
   const { t } = useI18n();
-  const { shouldShowSavings, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
+  const [, setLocation] = useLocation();
+  const { shouldShowSavings, getGatingMessage, getNextGatingStep } = useSimulation();
   const gatingMessage = getGatingMessage();
   
   // If not showing savings, show gated empty state
@@ -132,9 +134,9 @@ function ListMapView({
                 onClick={() => {
                   const nextStep = getNextGatingStep();
                   if (nextStep === 'device') {
-                    markDeviceLinked();
+                    setLocation('/connect/device');
                   } else if (nextStep === 'cloud') {
-                    markCloudAccountsLinked();
+                    setLocation('/connect/cloud');
                   }
                 }}
                 className="p-0 h-auto text-muted-foreground hover:text-primary"
@@ -169,9 +171,9 @@ function ListMapView({
                 onClick={() => {
                   const nextStep = getNextGatingStep();
                   if (nextStep === 'device') {
-                    markDeviceLinked();
+                    setLocation('/connect/device');
                   } else if (nextStep === 'cloud') {
-                    markCloudAccountsLinked();
+                    setLocation('/connect/cloud');
                   }
                 }}
                 className="text-sm"
@@ -303,7 +305,8 @@ function VisualMapView({
   showDetails: boolean;
 }) {
   const { t } = useI18n();
-  const { shouldShowSavings, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
+  const [, setLocation] = useLocation();
+  const { shouldShowSavings, getGatingMessage, getNextGatingStep } = useSimulation();
   const gatingMessage = getGatingMessage();
 
   // Use the standalone getDeviceIcon helper
@@ -330,9 +333,9 @@ function VisualMapView({
                 onClick={() => {
                   const nextStep = getNextGatingStep();
                   if (nextStep === 'device') {
-                    markDeviceLinked();
+                    setLocation('/connect/device');
                   } else if (nextStep === 'cloud') {
-                    markCloudAccountsLinked();
+                    setLocation('/connect/cloud');
                   }
                 }}
                 className="p-0 h-auto text-muted-foreground hover:text-primary"
@@ -491,9 +494,9 @@ function VisualMapView({
                 onClick={() => {
                   const nextStep = getNextGatingStep();
                   if (nextStep === 'device') {
-                    markDeviceLinked();
+                    setLocation('/connect/device');
                   } else if (nextStep === 'cloud') {
-                    markCloudAccountsLinked();
+                    setLocation('/connect/cloud');
                   }
                 }}
                 className="text-sm"
