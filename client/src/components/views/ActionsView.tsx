@@ -3,14 +3,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Zap, AlertCircle, Copy, Archive, FolderOpen } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function ActionsView() {
-  const { optimizationActions, mode } = useSimulation();
+  const { optimizationActions, mode, isProUser } = useSimulation();
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
+  
+  const isPro = isProUser();
 
   // Limit to 3-5 items max and sort by savings (avoid mutating original array)
   const maxItems = mode === 'easy' ? 3 : 5;
@@ -158,26 +162,31 @@ export default function ActionsView() {
       {/* Plan my savings CTA */}
       <Card className="border-dashed">
         <CardContent className="p-4 text-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                disabled 
-                size="lg" 
-                className="w-full"
-                data-testid="button-plan-savings"
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                {t('actions.plan_savings_cta')}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs max-w-xs">
-                {t('actions.plan_disabled_tooltip')}
-              </p>
-            </TooltipContent>
-          </Tooltip>
+          {isPro ? (
+            // Paid tier users - go to Plan preview
+            <Button 
+              size="lg" 
+              className="w-full"
+              onClick={() => setLocation('/plan')}
+              data-testid="button-plan-savings"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              {t('actions.plan_savings_cta')}
+            </Button>
+          ) : (
+            // Free tier users - go to Upgrade flow
+            <Button 
+              size="lg" 
+              className="w-full"
+              onClick={() => setLocation('/upgrade')}
+              data-testid="button-plan-savings"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              {t('actions.plan_savings_cta')}
+            </Button>
+          )}
           <p className="text-xs text-muted-foreground mt-2">
-            {t('labels.risk_note')}
+            {isPro ? t('labels.risk_note') : 'Upgrade to apply these optimizations automatically'}
           </p>
         </CardContent>
       </Card>
