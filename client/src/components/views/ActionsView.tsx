@@ -10,18 +10,22 @@ import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function ActionsView() {
-  const { optimizationActions, mode, isProUser, showDetails } = useSimulation();
+  const { mode, isProUser, showDetails, getRealisticOptimizationActions } = useSimulation();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
   
   const isPro = isProUser();
 
+  // Get centralized realistic actions with proper scaling
+  const { actions: realisticActions, totalSavings: fullTotalSavings } = getRealisticOptimizationActions();
+
   // Limit to 3-5 items max and sort by savings (avoid mutating original array)
   const maxItems = mode === 'easy' ? 3 : 5;
-  const sortedActions = [...optimizationActions]
+  const sortedActions = [...realisticActions]
     .sort((a, b) => b.estimated_savings_usd - a.estimated_savings_usd)
     .slice(0, maxItems);
 
+  // For display, show the sum of visible actions, not the full total
   const totalSavings = sortedActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
 
   const getActionIcon = (type: string) => {
@@ -55,8 +59,8 @@ export default function ActionsView() {
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />
 
-      {/* Total savings potential */}
-      {showDetails && (
+      {/* Total savings potential - always show in simulation */}
+      {totalSavings > 0 && (
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -134,20 +138,19 @@ export default function ActionsView() {
                           {action.description}
                         </CardDescription>
                         
-                        {/* Simplified metadata */}
-                        {showDetails && (
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                              {formatCurrency(action.estimated_savings_usd)} / month
-                            </div>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${getFrictionColor(action.friction)}`}
-                            >
-                              {t(`actions.friction_levels.${action.friction}`)} effort
-                            </Badge>
+                        {/* Action metadata - always show savings in simulation */}
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400" data-testid={`text-action-savings-${action.id}`}>
+                            {formatCurrency(action.estimated_savings_usd)} / month
                           </div>
-                        )}
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${getFrictionColor(action.friction)}`}
+                            data-testid={`badge-friction-${action.id}`}
+                          >
+                            {t(`actions.friction_levels.${action.friction}`)} effort
+                          </Badge>
+                        </div>
 
                         {/* Simplified summary */}
                         {showDetails && (

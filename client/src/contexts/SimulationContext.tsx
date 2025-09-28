@@ -99,6 +99,7 @@ interface SimulationActions {
   cancelSubscription: () => void;
   isProUser: () => boolean;
   getPotentialSavings: () => number;
+  getRealisticOptimizationActions: () => { actions: OptimizationAction[]; totalSavings: number; scalingFactor: number };
   
   // Health score
   getHealthScore: () => number;
@@ -451,42 +452,45 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     return true;
   };
 
-  const getPotentialSavings = (): number => {
+  // Centralized realistic savings calculation with scaling
+  const getRealisticOptimizationActions = () => {
     const currentCost = state.storageBreakdown.reduce((sum, breakdown) => sum + breakdown.estimated_monthly_cost, 0);
     
-    // Separate dedupe and cold storage savings to prevent double-counting
-    const dedupeActions = state.optimizationActions.filter(action => action.type === 'dedupe');
-    const coldStorageActions = state.optimizationActions.filter(action => action.type === 'cold_storage');
-    const otherActions = state.optimizationActions.filter(action => !['dedupe', 'cold_storage'].includes(action.type));
+    if (currentCost === 0) return { actions: [], totalSavings: 0, scalingFactor: 1 };
     
-    // Calculate dedupe savings
-    const dedupeSavings = dedupeActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    // Apply strict 40% cap from the start
+    const maxRealisticSavings = currentCost * 0.40;
     
-    // Calculate cold storage savings on non-duplicate files to avoid double-counting
-    const coldStorageSavings = coldStorageActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    // Get raw action savings
+    const rawActionSavings = state.optimizationActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
     
-    // Other optimization savings
-    const otherSavings = otherActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    // Calculate scaling factor if needed
+    const scalingFactor = rawActionSavings > maxRealisticSavings ? maxRealisticSavings / rawActionSavings : 1;
     
-    // Apply realistic migration overhead based on volume (estimate $0.01 per GB moved)
-    const coldStorageFiles = coldStorageActions.flatMap(action => action.affected_files || []);
-    const otherFiles = otherActions.flatMap(action => action.affected_files || []);
-    const movedBytes = [...coldStorageFiles, ...otherFiles].reduce((sum, file) => sum + file.size_bytes, 0);
-    const movedGB = movedBytes / (1024 * 1024 * 1024);
-    const migrationOverhead = movedGB * 0.01; // $0.01 per GB moved
+    // Create scaled actions
+    const scaledActions = state.optimizationActions.map(action => ({
+      ...action,
+      estimated_savings_usd: action.estimated_savings_usd * scalingFactor
+    }));
     
-    // Total realistic savings
-    const totalSavings = dedupeSavings + coldStorageSavings + otherSavings - migrationOverhead;
+    // Calculate total after scaling
+    const scaledTotal = scaledActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
     
-    // Cap savings at 40% of current monthly cost to be realistic
-    const maxSavings = currentCost * 0.40;
+    // Apply contingency buffer for unexpected costs (2% of current cost)
+    const contingencyBuffer = currentCost * 0.02;
     
-    // Apply realistic constraints
-    if (totalSavings < 1) {
-      return 0; // Don't show tiny savings
-    }
+    // Calculate final realistic savings
+    const finalSavings = Math.max(0, scaledTotal - contingencyBuffer);
     
-    return Math.min(totalSavings, maxSavings);
+    return {
+      actions: scaledActions,
+      totalSavings: finalSavings >= 1.00 ? Math.min(finalSavings, maxRealisticSavings) : 0,
+      scalingFactor
+    };
+  };
+
+  const getPotentialSavings = (): number => {
+    return getRealisticOptimizationActions().totalSavings;
   };
 
   const getHealthScore = (): number => {
@@ -517,7 +521,7 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
 
     // Calculate cost efficiency (25% weight) - use realistic savings that match display
     const currentCost = state.storageBreakdown.reduce((sum, breakdown) => sum + breakdown.estimated_monthly_cost, 0);
-    const realisticSavings = getPotentialSavings(); // Use same logic as displayed savings
+    const realisticSavings = getPotentialSavings(); // Use enhanced realistic savings logic
     const savingsRatio = currentCost > 0 ? realisticSavings / currentCost : 0;
     const costEfficiencyScore = 100 * (1 - clamp(savingsRatio, 0, 1));
 
@@ -592,6 +596,7 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     cancelSubscription,
     isProUser,
     getPotentialSavings,
+    getRealisticOptimizationActions,
     getHealthScore,
     shouldShowScore,
     shouldShowSavings,

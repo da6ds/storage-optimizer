@@ -85,6 +85,71 @@ export class CostCalculator {
     return pricing.base_usd_per_month + (overage * pricing.overage_usd_per_gb);
   }
 
+  // Calculate optimal storage plan with 15% headroom for growth
+  calculateOptimalPlan(usageGb: number): { provider: string; cost: number; headroomGb: number } {
+    const headroomMultiplier = 1.15; // 15% headroom
+    const planningGb = usageGb * headroomMultiplier;
+    
+    let optimal = { provider: '', cost: Infinity, headroomGb: 0 };
+
+    for (const [provider, pricing] of Object.entries(this.pricingConfig.providers)) {
+      const cost = this.calculateProviderCost(provider, planningGb);
+      if (cost < optimal.cost) {
+        optimal = { 
+          provider, 
+          cost, 
+          headroomGb: planningGb - usageGb 
+        };
+      }
+    }
+
+    return optimal;
+  }
+
+  // Calculate migration costs including egress and API fees
+  calculateMigrationCosts(files: SimulatedFile[], targetProvider: string): number {
+    let totalCost = 0;
+    
+    for (const file of files) {
+      const sourceProvider = normalizeProviderKey(file.provider);
+      const targetNormalized = normalizeProviderKey(targetProvider);
+      
+      // Skip if moving to same provider
+      if (sourceProvider === targetNormalized) continue;
+      
+      const sizeGb = file.size_bytes / (1024 * 1024 * 1024);
+      
+      // Egress costs for downloading from source provider
+      const egressCost = this.getEgressCost(sourceProvider, sizeGb);
+      
+      // API operation costs
+      const apiCost = this.getApiOperationCost(sourceProvider, targetNormalized);
+      
+      totalCost += egressCost + apiCost;
+    }
+    
+    return totalCost;
+  }
+
+  private getEgressCost(provider: string, sizeGb: number): number {
+    // Realistic egress pricing based on provider
+    const egressRates: Record<string, number> = {
+      'google_drive': 0.12, // $0.12 per GB
+      'dropbox': 0.15,      // $0.15 per GB
+      'onedrive': 0.09,     // $0.09 per GB
+      'icloud': 0.20,       // $0.20 per GB (higher due to limited API)
+      'local': 0.00         // No egress from local
+    };
+    
+    const rate = egressRates[provider] || 0.10;
+    return sizeGb * rate;
+  }
+  
+  private getApiOperationCost(sourceProvider: string, targetProvider: string): number {
+    // Fixed API operation costs per file transfer
+    return 0.001; // $0.001 per file operation
+  }
+
   getCheapestProviderForSize(sizeGb: number): { provider: string; cost: number } {
     let cheapest = { provider: '', cost: Infinity };
 
@@ -182,7 +247,7 @@ export class FileAnalyzer {
           }
         }
 
-        // Calculate potential savings from removing duplicates
+        // Calculate potential savings from removing duplicates (raw savings only)
         const duplicatesToRemove = clusterFiles.filter((f: SimulatedFile) => f.id !== keeper.id);
         let savings = 0;
         for (const duplicate of duplicatesToRemove) {
@@ -257,42 +322,113 @@ export class FileAnalyzer {
 
   generateOptimizationActions(files: SimulatedFile[]): OptimizationAction[] {
     const actions: OptimizationAction[] = [];
+    const processedFileIds = new Set<string>(); // Track files to prevent double-counting
 
     // Deduplication actions
     const duplicateClusters = this.findDuplicateClusters(files);
     for (const cluster of duplicateClusters.slice(0, 10)) { // Top 10 clusters
       const duplicatesToRemove = cluster.files.filter(f => f.id !== cluster.recommended_keeper.id);
       
-      actions.push({
-        id: `dedupe-${cluster.hash}`,
-        type: 'dedupe',
-        title: `Remove ${duplicatesToRemove.length} duplicate copies`,
-        description: `Keep file on ${cluster.recommended_keeper.provider}, remove copies from other providers`,
-        estimated_savings_usd: cluster.potential_savings_usd,
-        friction: duplicatesToRemove.length <= 3 ? 'low' : duplicatesToRemove.length <= 8 ? 'medium' : 'high',
-        affected_files: duplicatesToRemove,
-        provider_changes: Array.from(new Set(duplicatesToRemove.map((f: SimulatedFile) => f.provider)))
-      });
+      // Calculate realistic savings including migration costs
+      const migrationCost = this.costCalculator.calculateMigrationCosts(duplicatesToRemove, cluster.recommended_keeper.provider);
+      const netSavings = Math.max(0, cluster.potential_savings_usd - migrationCost);
+      
+      if (netSavings > 0.50) { // Only include if net savings > $0.50
+        actions.push({
+          id: `dedupe-${cluster.hash}`,
+          type: 'dedupe',
+          title: `Remove ${duplicatesToRemove.length} duplicate copies`,
+          description: `Keep file on ${cluster.recommended_keeper.provider}, remove copies from other providers`,
+          estimated_savings_usd: netSavings,
+          friction: duplicatesToRemove.length <= 3 ? 'low' : duplicatesToRemove.length <= 8 ? 'medium' : 'high',
+          affected_files: duplicatesToRemove,
+          provider_changes: Array.from(new Set(duplicatesToRemove.map((f: SimulatedFile) => f.provider)))
+        });
+        
+        // Mark these files as processed to prevent double-counting in cold storage
+        cluster.files.forEach(f => processedFileIds.add(f.id));
+      }
     }
 
-    // Cold storage actions
-    const coldFiles = this.findColdFiles(files);
+    // Cold storage actions (exclude already processed duplicates)
+    const coldFiles = this.findColdFiles(files).filter(f => !processedFileIds.has(f.id));
     if (coldFiles.length > 0) {
-      const savings = this.costCalculator.calculateArchiveSavings(coldFiles);
+      const rawSavings = this.costCalculator.calculateArchiveSavings(coldFiles);
+      const migrationCost = this.costCalculator.calculateMigrationCosts(coldFiles, coldFiles[0]?.provider || 'local');
+      const netSavings = Math.max(0, rawSavings - (migrationCost * 0.5)); // 50% of migration cost for archive moves
       
-      actions.push({
-        id: 'cold-storage',
-        type: 'cold_storage',
-        title: `Archive ${coldFiles.length} old files`,
-        description: `Move large files older than 6 months to cheaper archive storage`,
-        estimated_savings_usd: savings,
-        friction: coldFiles.length <= 20 ? 'low' : coldFiles.length <= 100 ? 'medium' : 'high',
-        affected_files: coldFiles,
-        provider_changes: Array.from(new Set(coldFiles.map((f: SimulatedFile) => f.provider)))
-      });
+      if (netSavings > 1.00) { // Only include if net savings > $1.00
+        actions.push({
+          id: 'cold-storage',
+          type: 'cold_storage',
+          title: `Archive ${coldFiles.length} old files`,
+          description: `Move large files older than 6 months to cheaper archive storage`,
+          estimated_savings_usd: netSavings,
+          friction: coldFiles.length <= 20 ? 'low' : coldFiles.length <= 100 ? 'medium' : 'high',
+          affected_files: coldFiles,
+          provider_changes: Array.from(new Set(coldFiles.map((f: SimulatedFile) => f.provider)))
+        });
+      }
     }
+
+    // Provider consolidation actions
+    const consolidationActions = this.generateConsolidationActions(files, processedFileIds);
+    actions.push(...consolidationActions);
 
     return actions.sort((a, b) => b.estimated_savings_usd - a.estimated_savings_usd);
+  }
+
+  private generateConsolidationActions(files: SimulatedFile[], processedFileIds: Set<string>): OptimizationAction[] {
+    const actions: OptimizationAction[] = [];
+    const availableFiles = files.filter(f => !processedFileIds.has(f.id));
+    
+    if (availableFiles.length === 0) return actions;
+    
+    // Calculate total usage per provider
+    const providerUsage = new Map<string, { files: SimulatedFile[], sizeGb: number }>();
+    
+    for (const file of availableFiles) {
+      const provider = normalizeProviderKey(file.provider);
+      if (!providerUsage.has(provider)) {
+        providerUsage.set(provider, { files: [], sizeGb: 0 });
+      }
+      const usage = providerUsage.get(provider)!;
+      usage.files.push(file);
+      usage.sizeGb += file.size_bytes / (1024 * 1024 * 1024);
+    }
+    
+    // Only consider consolidation if using 3+ providers
+    if (providerUsage.size < 3) return actions;
+    
+    // Find total usage and optimal plan
+    const totalSizeGb = Array.from(providerUsage.values()).reduce((sum, usage) => sum + usage.sizeGb, 0);
+    const optimalPlan = this.costCalculator.calculateOptimalPlan(totalSizeGb);
+    
+    // Calculate current cost
+    let currentCost = 0;
+    for (const [provider, usage] of Array.from(providerUsage.entries())) {
+      currentCost += this.costCalculator.calculateProviderCost(provider, usage.sizeGb);
+    }
+    
+    // Calculate migration costs and net savings
+    const migrationCost = this.costCalculator.calculateMigrationCosts(availableFiles, optimalPlan.provider);
+    const potentialSavings = currentCost - optimalPlan.cost;
+    const netSavings = Math.max(0, potentialSavings - migrationCost);
+    
+    if (netSavings > 2.00) { // Only suggest if net savings > $2.00
+      actions.push({
+        id: 'consolidate-providers',
+        type: 'consolidation',
+        title: `Consolidate to ${optimalPlan.provider}`,
+        description: `Move all files to ${optimalPlan.provider} for optimal pricing (includes ${optimalPlan.headroomGb.toFixed(0)}GB growth headroom)`,
+        estimated_savings_usd: netSavings,
+        friction: providerUsage.size <= 3 ? 'medium' : 'high',
+        affected_files: availableFiles,
+        provider_changes: Array.from(providerUsage.keys()).filter(p => p !== optimalPlan.provider)
+      });
+    }
+    
+    return actions;
   }
 }
 
