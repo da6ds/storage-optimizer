@@ -1,4 +1,6 @@
-import { Switch, Route } from 'wouter';
+import { Switch, Route, useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 import { useSimulation, useRouting, useI18n } from '../contexts/SimulationContext';
 import SimulationOnboarding from './SimulationOnboarding';
 import SimulationBottomNav from './SimulationBottomNav';
@@ -11,11 +13,13 @@ import PlanView from './views/PlanView';
 import ModeGoalIndicator from './ModeGoalIndicator';
 import LoadingScreen from './LoadingScreen';
 import UpgradeFlow from './upgrade/UpgradeFlow';
+import SettingsPage from './pages/SettingsPage';
 
 export default function SimulationApp() {
   const { onboardingComplete, isLoading, error } = useSimulation();
   const { getDefaultRoute } = useRouting();
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -51,7 +55,17 @@ export default function SimulationApp() {
             <h1 className="text-lg font-semibold">{t('app.title')}</h1>
             <p className="text-xs text-muted-foreground">{t('app.simulation_mode')}</p>
           </div>
-          <ModeGoalIndicator />
+          <div className="flex items-center gap-2">
+            <ModeGoalIndicator />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setLocation('/settings')}
+              data-testid="button-settings"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -59,6 +73,7 @@ export default function SimulationApp() {
       <main className="flex-1 overflow-hidden pb-safe">
         <Switch>
           <Route path="/onboarding" component={SimulationOnboarding} />
+          <Route path="/settings" component={SettingsPage} />
           <Route path="/upgrade" component={UpgradeFlow} />
           <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
           <Route path="/map" component={MapView} />
