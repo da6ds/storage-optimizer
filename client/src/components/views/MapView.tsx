@@ -115,6 +115,76 @@ function ListMapView({
   mode: string | null;
 }) {
   const { t } = useI18n();
+  const { shouldShowSavings, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
+  const gatingMessage = getGatingMessage();
+  
+  // If not showing savings, show gated empty state
+  if (!shouldShowSavings()) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Storage Providers</CardTitle>
+          <CardDescription>
+            {gatingMessage ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    markDeviceLinked();
+                  } else if (nextStep === 'cloud') {
+                    markCloudAccountsLinked();
+                  }
+                }}
+                className="p-0 h-auto text-muted-foreground hover:text-primary"
+                data-testid="button-list-gating-action"
+              >
+                {gatingMessage} →
+              </Button>
+            ) : (
+              "Your cloud storage accounts"
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center py-8 space-y-4">
+            {/* Empty provider slots */}
+            <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-16 h-16 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center mx-auto">
+                  <Cloud className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+              ))}
+            </div>
+            
+            {/* Connection prompt */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                {gatingMessage}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    markDeviceLinked();
+                  } else if (nextStep === 'cloud') {
+                    markCloudAccountsLinked();
+                  }
+                }}
+                className="text-sm"
+                data-testid="button-list-connect"
+              >
+                {getNextGatingStep() === 'device' ? "Connect this device" : "Connect cloud accounts"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <>
@@ -233,7 +303,7 @@ function VisualMapView({
   showDetails: boolean;
 }) {
   const { t } = useI18n();
-  const { shouldShowSavings, getGatingMessage } = useSimulation();
+  const { shouldShowSavings, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
   const gatingMessage = getGatingMessage();
 
   // Use the standalone getDeviceIcon helper
@@ -253,7 +323,26 @@ function VisualMapView({
         <CardHeader>
           <CardTitle>Storage Overview</CardTitle>
           <CardDescription>
-            {gatingMessage ? `${gatingMessage}` : "Your complete storage picture"}
+            {gatingMessage ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    markDeviceLinked();
+                  } else if (nextStep === 'cloud') {
+                    markCloudAccountsLinked();
+                  }
+                }}
+                className="p-0 h-auto text-muted-foreground hover:text-primary"
+                data-testid="button-map-gating-action"
+              >
+                {gatingMessage} →
+              </Button>
+            ) : (
+              "Your complete storage picture"
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -293,129 +382,128 @@ function VisualMapView({
 
       {/* Visual Map Layout */}
       <div className="relative min-h-[400px] p-8 bg-muted/30 rounded-lg">
-        {/* Cloud Providers - Top Row */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
-          {clouds.map((provider, index) => (
-            <CloudNode 
-              key={provider.provider} 
-              provider={provider} 
-              showDetails={showDetails}
-              index={index}
-            />
-          ))}
-        </div>
+        {shouldShowSavings() ? (
+          // Show connected map
+          <>
+            {/* Cloud Providers - Top Row */}
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
+              {clouds.map((provider, index) => (
+                <CloudNode 
+                  key={provider.provider} 
+                  provider={provider} 
+                  showDetails={showDetails}
+                  index={index}
+                />
+              ))}
+            </div>
 
-        {/* Center Avatar */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" data-testid="center-avatar">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg">
-            <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
-              <span className="text-primary font-bold text-sm">You</span>
+            {/* Center Avatar */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" data-testid="center-avatar">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
+                  <span className="text-primary font-bold text-sm">You</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Device Nodes - Bottom Row */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
+              {devices.map((device, index) => (
+                <DeviceNode 
+                  key={device.id} 
+                  device={device} 
+                  showDetails={showDetails}
+                  index={index}
+                />
+              ))}
+            </div>
+
+            {/* Connection Lines */}
+            <svg className="absolute inset-0 w-full h-full text-muted-foreground" style={{ zIndex: 0, pointerEvents: 'auto' }}>
+              {/* Sync/Backup relationships - solid lines from devices to clouds */}
+              {devices.map((device, deviceIndex) => 
+                clouds.map((cloud, cloudIndex) => {
+                  // Create sync relationship for demonstration - device 0 syncs to cloud 0, device 1 to cloud 1, etc
+                  const hasSync = deviceIndex === cloudIndex || (deviceIndex === 0 && cloudIndex === 1); // iPhone syncs to both Google Drive and Dropbox
+                  if (!hasSync) return null;
+                  
+                  return (
+                    <line
+                      key={`sync-${device.id}-${cloud.provider}`}
+                      x1={`${50 + (deviceIndex - devices.length/2 + 0.5) * 20}%`}
+                      y1="70%" // slightly above device position
+                      x2={`${50 + (cloudIndex - clouds.length/2 + 0.5) * 20}%`}
+                      y2="30%" // slightly below cloud position
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="none"
+                      className="animate-pulse"
+                      onMouseEnter={(e) => {
+                        const target = e.target as SVGLineElement;
+                        target.style.strokeWidth = '3';
+                        target.style.stroke = 'hsl(var(--primary))';
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.target as SVGLineElement;
+                        target.style.strokeWidth = '2';
+                        target.style.stroke = 'currentColor';
+                      }}
+                    />
+                  );
+                })
+              )}
+            </svg>
+          </>
+        ) : (
+          // Show empty state
+          <div className="flex flex-col items-center justify-center h-full space-y-6">
+            {/* Empty cloud slots */}
+            <div className="flex space-x-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-16 h-16 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
+                  <Cloud className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+              ))}
+            </div>
+            
+            {/* Center You */}
+            <div className="w-16 h-16 bg-muted border-2 border-dashed border-muted-foreground/50 rounded-full flex items-center justify-center">
+              <span className="text-muted-foreground text-sm font-medium">You</span>
+            </div>
+            
+            {/* Empty device slots */}
+            <div className="flex space-x-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-16 h-16 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
+                  <Smartphone className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+              ))}
+            </div>
+            
+            {/* Connection prompt */}
+            <div className="text-center space-y-2 pt-4">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                {gatingMessage}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const nextStep = getNextGatingStep();
+                  if (nextStep === 'device') {
+                    markDeviceLinked();
+                  } else if (nextStep === 'cloud') {
+                    markCloudAccountsLinked();
+                  }
+                }}
+                className="text-sm"
+                data-testid="button-visual-map-connect"
+              >
+                {getNextGatingStep() === 'device' ? "Connect this device" : "Connect cloud accounts"}
+              </Button>
             </div>
           </div>
-        </div>
-
-        {/* Device Nodes - Bottom Row */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
-          {devices.map((device, index) => (
-            <DeviceNode 
-              key={device.id} 
-              device={device} 
-              showDetails={showDetails}
-              index={index}
-            />
-          ))}
-        </div>
-
-        {/* Connection Lines */}
-        <svg className="absolute inset-0 w-full h-full text-muted-foreground" style={{ zIndex: 0, pointerEvents: 'auto' }}>
-          {/* Sync/Backup relationships - solid lines from devices to clouds */}
-          {devices.map((device, deviceIndex) => 
-            clouds.map((cloud, cloudIndex) => {
-              // Create sync relationship for demonstration - device 0 syncs to cloud 0, device 1 to cloud 1, etc
-              const hasSync = deviceIndex === cloudIndex || (deviceIndex === 0 && cloudIndex === 1); // iPhone syncs to both Google Drive and Dropbox
-              if (!hasSync) return null;
-              
-              return (
-                <line
-                  key={`sync-${device.id}-${cloud.provider}`}
-                  x1={`${50 + (deviceIndex - devices.length/2 + 0.5) * 20}%`}
-                  y1="70%" // slightly above device position
-                  x2={`${50 + (cloudIndex - clouds.length/2 + 0.5) * 20}%`}
-                  y2="30%" // slightly below cloud position
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  style={{ 
-                    opacity: 0.4,
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.target.style.opacity = '0.7'; }}
-                  onMouseLeave={(e) => { e.target.style.opacity = '0.4'; }}
-                  data-testid={`sync-line-${device.id}-${cloud.provider}`}
-                />
-              );
-            })
-          ).flat().filter(Boolean)}
-          
-          {/* Duplicate arcs - curved dotted lines between clouds with duplicates */}
-          {clouds.map((cloud1, index1) => 
-            clouds.slice(index1 + 1).map((cloud2, index2) => {
-              const cloud2Index = index1 + index2 + 1;
-              const x1 = 50 + (index1 - clouds.length/2 + 0.5) * 20;
-              const x2 = 50 + (cloud2Index - clouds.length/2 + 0.5) * 20;
-              const y = 25;
-              const midX = (x1 + x2) / 2;
-              const midY = y - 8; // Arc above the clouds
-              
-              return (
-                <path
-                  key={`duplicate-${cloud1.provider}-${cloud2.provider}`}
-                  d={`M ${x1}% ${y}% Q ${midX}% ${midY}% ${x2}% ${y}%`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeDasharray="3,3"
-                  style={{ 
-                    opacity: 0.5,
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.target.style.opacity = '0.8'; }}
-                  onMouseLeave={(e) => { e.target.style.opacity = '0.5'; }}
-                  data-testid={`duplicate-arc-${cloud1.provider}-${cloud2.provider}`}
-                />
-              );
-            })
-          ).flat()}
-          
-          {/* Basic connections from center to all nodes */}
-          {clouds.map((_, index) => (
-            <line
-              key={`center-cloud-${index}`}
-              x1="50%"
-              y1="50%"
-              x2={`${50 + (index - clouds.length/2 + 0.5) * 20}%`}
-              y2="25%"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="5,5"
-              opacity="0.3"
-            />
-          ))}
-          {devices.map((_, index) => (
-            <line
-              key={`center-device-${index}`}
-              x1="50%"
-              y1="50%"
-              x2={`${50 + (index - devices.length/2 + 0.5) * 20}%`}
-              y2="75%"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="5,5"
-              opacity="0.3"
-            />
-          ))}
-        </svg>
+        )}
       </div>
     </div>
   );

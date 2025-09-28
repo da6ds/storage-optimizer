@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useSimulation, useI18n } from '../contexts/SimulationContext';
 
 export default function HealthScoreDisplay() {
-  const { getHealthScore, showDetails, shouldShowScore, getGatingMessage } = useSimulation();
+  const { getHealthScore, showDetails, shouldShowScore, getGatingMessage, getNextGatingStep, markDeviceLinked, markCloudAccountsLinked } = useSimulation();
   const { t } = useI18n();
   const [showExplainer, setShowExplainer] = useState(false);
 
@@ -74,9 +74,23 @@ export default function HealthScoreDisplay() {
         <Progress value={canShowScore ? score : 0} className="h-2" />
         
         {!canShowScore && gatingMessage && (
-          <div className="text-sm text-muted-foreground text-center">
-            {gatingMessage}
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Use robust gating step detection
+              const nextStep = getNextGatingStep();
+              if (nextStep === 'device') {
+                markDeviceLinked();
+              } else if (nextStep === 'cloud') {
+                markCloudAccountsLinked();
+              }
+            }}
+            className="w-full text-sm"
+            data-testid="button-gating-action"
+          >
+            {getNextGatingStep() === 'device' ? "Link this device" : gatingMessage}
+          </Button>
         )}
         
         {canShowScore && showDetails && showExplainer && (

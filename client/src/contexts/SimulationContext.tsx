@@ -107,6 +107,7 @@ interface SimulationActions {
   shouldShowScore: () => boolean;
   shouldShowSavings: () => boolean;
   getGatingMessage: () => string;
+  getNextGatingStep: () => 'device' | 'cloud' | null;
 }
 
 type SimulationContextType = SimulationState & SimulationActions;
@@ -563,6 +564,16 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     return "";
   };
 
+  const getNextGatingStep = (): 'device' | 'cloud' | null => {
+    if (!state.checklist.deviceLinked) {
+      return 'device';
+    }
+    if (!state.checklist.cloudAccountsLinked) {
+      return 'cloud';  
+    }
+    return null;
+  };
+
   const contextValue: SimulationContextType = {
     ...state,
     setUserMode,
@@ -584,7 +595,8 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     getHealthScore,
     shouldShowScore,
     shouldShowSavings,
-    getGatingMessage
+    getGatingMessage,
+    getNextGatingStep
   };
 
   return (
