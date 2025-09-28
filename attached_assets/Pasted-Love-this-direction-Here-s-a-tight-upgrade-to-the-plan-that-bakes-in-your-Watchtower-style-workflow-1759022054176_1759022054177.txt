@@ -1,0 +1,139 @@
+Love this direction. Here’s a tight upgrade to the plan that bakes in your Watchtower-style workflow, realistic savings, a visual score, and simplified onboarding.
+
+# What changes (summary)
+
+* **One-question onboarding**: only “What do you want to do today?” (View · Suggestions · Plan).
+* **Persistent “Details” toggle** in the header to expand/collapse technical info everywhere.
+* **Refresh**: global **“Refresh connections”** action + per-provider refresh; shows last sync time, progress, and errors.
+* **Success state** after optimization (free or pro) with receipts, diffs, and “View history.”
+* **Storage Health Score (0–100)** shown on every tab, with a gauge like Watchtower.
+* **Realistic savings model** with caps, sanity checks, and “plan-change” logic.
+* **Plan changes**: we don’t auto-change billing tiers (APIs rare/unsafe). We **recommend**, deep-link, and generate a guided checklist; optional future automation where providers allow it.
+
+---
+
+## UX changes in detail
+
+### Onboarding (single page)
+
+* **Headline:** *See it all. Clean it all.*
+* **Q:** *What do you want to do today?* — **View · Suggestions · Plan**
+* **Primary CTA:** *Continue → See My Storage*
+* **Header control (always visible):** **Details ▢** (off by default). Toggling reveals extra rows, formulas, and advanced filters everywhere.
+
+### Global refresh
+
+* Header: **Refresh connections** (icon + label).
+* Shows modal with per-provider status, last sync time, and a compact log.
+* After refresh: banner “Updated just now · 5,182 files scanned · 3 providers” and recomputed **Score** + **Savings**.
+
+### Score (visual)
+
+**Storage Health Score (0–100)** with color zones and “What this means.”
+Default weights (editable later):
+
+* **Duplication (35%)**: 100 − min(100, 20×duplicate_ratio).
+* **Cold bulk (25%)**: 100 − min(100, 10×share_of_cold_over_1GB).
+* **Cost efficiency (25%)**: 100 − min(100, 100×(current_cost − optimal_cost)/max(current_cost,1)).
+* **Fragmentation (10%)**: 100 − 5×(providers_used − 1) (floor at 0).
+* **Risk posture (5%)**: +5 if backups enabled on Actions; 0 otherwise.
+  Show a tiny “?” that opens a plain-language breakdown.
+
+### Actions tab (Free vs Pro)
+
+* Keep **3–5** items max, each with **type** (“Exact duplicate photos,” “Large old videos,” “Consolidate Project X”).
+* Top of page: **Estimated savings $/mo** (big), then **Upgrade to start saving** (Free) or **Start cleanup** (Pro).
+* **Free**: items read-only; tap reveals why + steps; CTA goes to **Upgrade**.
+* **Pro**: checkboxes, **Plan preview → Confirm → Progress → Done**. Optional **Backup add-on** at confirm.
+
+### Success state (Pro)
+
+* **Big checkmark + “Cleanup complete.”**
+* “You freed **N GB** and reduced costs by **~$Y/mo**.”
+* Buttons: **View history**, **Share summary**, **Run refresh**.
+
+---
+
+## Realistic savings (model tweaks)
+
+**Guardrails**
+
+* **Ceiling:** Savings ≤ **40% of current monthly cost** unless user is truly over tier (computed).
+* **Floor:** If computed savings < $1/mo, label as “tiny” and downplay CTA.
+* **No double counting:** Don’t stack “duplicate removal” and “plan downgrade” on the same bytes twice.
+* **One-time vs monthly:** If moving to archive incurs **egress or cold-line fees**, subtract those from the first month’s savings.
+* **Migration cost:** Apply a small flat “move overhead” per GB in simulation to avoid fairy-tale numbers.
+
+**Plan-change logic (recommendation, not action)**
+
+* Compute the **smallest plan that fits** post-cleanup usage + headroom (e.g., 15% buffer).
+* If a lower tier exists, create a recommendation: “**Downgrade iCloud from 2TB → 200GB** (est. −$X/mo).”
+* **Deliver:** deep link to the provider’s manage-plan page + checklist and a “Mark as done” toggle (so we can recalc Score/Savings).
+* Only consider auto-changes later **if** a provider exposes a safe, scoped API *and* the user opts in.
+
+---
+
+## Copy you can drop in now
+
+**Savings banner (Free)**
+
+* Title: **You could save about ${{savings}}/month**
+* Body: *This is a safe preview. Upgrade to apply these changes automatically.*
+* CTA: **Upgrade to start saving**
+
+**Savings banner (Pro after refresh)**
+
+* Title: **Estimated savings: ${{savings}}/month**
+* Body: *Select actions below. You can review and unselect items before we start.*
+* CTA: **Start cleanup**
+
+**Score explainer**
+
+* Title: **Storage Health Score**
+* Body: *Higher is better. We look at duplicates, large old files, cost efficiency, and how scattered your files are.*
+
+**Refresh**
+
+* Button: **Refresh connections**
+* Status line: **Updated {{timeAgo}} · {{fileCount}} files · {{providerCount}} providers**
+
+**Success (Pro)**
+
+* Title: **Cleanup complete**
+* Body: *Freed **{{freedGB}} GB** · New monthly cost **~${{newCost}}** · Score **{{score}}/100***
+* Buttons: **View history** · **Share summary** · **Refresh now**
+
+---
+
+## Simulation fixes (right now)
+
+Ask Agent to update the sim math so totals are sane:
+
+**Paste:**
+
+> **Plan tweak — simulation realism:** Cap monthly savings at **40% of current cost**, avoid double-counting between dedupe and plan changes, subtract estimated migration/egress costs for archive moves, and compute “optimal plan” as the smallest tier that fits post-cleanup usage with **15% buffer**. Recompute **Storage Health Score** per the weights above. Update `/docs/copy.md` and `/docs/wireframes.md` to show the **Score gauge**, **Refresh connections**, and **success state** screens.
+
+---
+
+## Onboarding simplification (one question + details toggle)
+
+**Paste:**
+
+> **Plan change — onboarding & details:** Replace the Familiarity question with a **single onboarding question**: *“What do you want to do today?”* (View · Suggestions · Plan). Add a persistent **Details** toggle in the header that expands advanced info (formulas, tables, raw numbers) on every page. Remove mode density logic; keep the nav the same. Update `/docs/ux-flow.md`, `/docs/navigation.md`, and all wireframes + copy.
+
+---
+
+## About “can the app change pricing plans?”
+
+* **Today:** treat plan changes as recommendations + deep links + checklists. Most providers don’t expose safe public APIs for plan changes, and even when they do, you’d need scary scopes.
+* **Near-future:** If a provider offers a narrow “change tier” API, we can gate it behind an explicit **“Allow plan changes”** setting, show the exact scope, and keep a full audit log.
+
+---
+
+## After Agent updates the docs
+
+* Quick skim to confirm: Score, Refresh, Success, one-question onboarding, realistic savings math.
+* Commit, then push to GitHub (use the steps I gave).
+* When you’re ready, run the **Build (Hydrate Simulation UI)** pass again so the preview shows the **Score**, **Refresh**, and the simplified onboarding.
+
+If you want, I’ll package these two “Plan tweaks” into one message you can paste as-is to Agent so it applies all changes in a single go.

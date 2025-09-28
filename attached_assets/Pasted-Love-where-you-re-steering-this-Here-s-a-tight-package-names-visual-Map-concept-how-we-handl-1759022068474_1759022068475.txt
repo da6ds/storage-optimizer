@@ -1,0 +1,143 @@
+Love where you’re steering this. Here’s a tight package: names + visual “Map” concept + how we handle backups/redundancy sanely + an education/walkthrough module — plus a single copy-paste prompt to update your Plan docs.
+
+---
+
+# Name ideas (with crisp taglines)
+
+Pick one now; we can always alias in the UI.
+
+* **StorageMap** — *See it all. Clean it all.* (clear, literal, pairs with your Map view)
+* **SpaceLens** — *A clear view of your files and costs.*
+* **StashMap** — *Where your stuff lives, at a glance.*
+* **ByteHouse** — *Organize your digital house.*
+* **StoreWise** — *Spend less. Store smarter.*
+* **DataDeck** — *One dashboard for your files.*
+* **Atlas** — *Your files, charted.*
+
+Default in docs if you don’t pick: **StorageMap**.
+
+---
+
+# Visual Map (toggle: List ▢ / Visual ▣)
+
+**Goal:** make storage understandable at a glance — “my devices here, my clouds up there, what’s on each, what it costs, and where dupes live.”
+
+**Layout (mobile-first)**
+
+* Avatar bubble in center → **Your Devices** (phone, tablet, laptop) as icons below; **Cloud services** (Drive, iCloud, OneDrive, Dropbox) as icons above.
+* Each node shows:
+
+  * **Used** (GB) + **% full**
+  * **Est. $/mo** (for clouds)
+  * Tiny legend for file-type mix (photos/videos/docs/other)
+* **Edges** (lines):
+
+  * Thickness = number of files that “link” (backed up/synced) between nodes.
+  * **Duplicate arcs** drawn in a dotted style; tap to open the cluster.
+* **Heat tint** on nodes with waste (many dupes / cold bulk).
+* **Score gauge** pinned top-right: **Storage Health 0–100** with “What this means”.
+* Switch at top: **List | Visual** (remembers choice).
+
+**Interactions**
+
+* Tap a node → drawer: Top files, “waste” breakdown, **Recommended action** chip.
+* Tap a duplicate arc → list of files in the cluster + “Keep here” badge (cheapest/newest rule).
+* Long-press node → “Refresh this provider”.
+
+---
+
+# Redundancy done right (people like backups!)
+
+We embrace redundancy; we just make it **intentional** and **cheap**.
+
+**Redundancy Plan (plain-English presets)**
+
+* **Essential (1+1)** — *One main copy + one backup.* Cheapest; good for most people.
+* **Balanced (1+2)** — *Main + two backups (one cold).* For photo hoarders.
+* **Paranoid (1+3)** — *Main + three backups across providers.* For belt-and-suspenders folks.
+
+**Controls (in Settings → Backup)**
+
+* **Copies slider:** Keep **2–4 copies** of important stuff.
+* **What counts as “important”**: starred folders, photos, tax docs (toggleable).
+* **Hot vs Cold:** “Keep backups in cheaper archive storage when possible.”
+* **Budget:** “Keep my total storage under **$X/mo**” (we optimize to that cap).
+
+**Engine changes (simple, fair math)**
+
+* Suggestions never drop you below your chosen copies count.
+* If deduping would violate backup count, we convert the extra copies into **cheaper backups** (e.g., move to archive tier) instead of deleting.
+* Savings are shown **after** honoring your redundancy target.
+* We show **where your backups live** on the Visual Map (light halo rings around nodes).
+
+**Education touchpoints**
+
+* Every recommendation includes a one-liner: *“You’ll still have 2 copies after this change.”*
+* A small **“Why keep backups?”** link explains “hot vs cold” and recovery basics in two sentences.
+
+---
+
+# Education / Guided Setups (per provider)
+
+**Tab: Learn** (or inside Actions → “How to set this up”)
+
+* Tiny lessons with checklists and deep links. Tone: brutally clear.
+
+**Templates (we’ll auto-fill specifics per platform)**
+
+* **iOS / iPadOS Photos**
+
+  1. Open **Settings → Photos**
+  2. Turn on **iCloud Photos**
+  3. Choose **Optimize iPhone Storage** (keeps originals in iCloud, frees device space)
+  4. Verify: Photos app shows a cloud badge
+* **macOS Photos (optimize)**
+
+  1. Photos → Settings → **iCloud**
+  2. Enable **iCloud Photos** and **Optimize Mac Storage**
+* **Google Photos (Android/iOS)**
+
+  1. Google Photos → Profile → **Photos settings**
+  2. **Back up**: On · **Upload size**: Storage saver
+* **Google Drive (desktop app)**
+
+  1. Install Drive for desktop → **Stream files** (not Mirror) for space savings
+* **OneDrive (Windows/macOS)**
+
+  1. OneDrive Settings → **Files On-Demand**: On
+* **Dropbox**
+
+  1. Dropbox app → Preferences → **Smart Sync**: Automatic
+
+Each guide ends with **“Mark as done”** → we **Refresh** and update **Score** + **Estimated savings**.
+
+---
+
+# Fix the unrealistic savings
+
+* Cap monthly savings at **40%** of current cost unless a plan downgrade is provably available.
+* Don’t double-count bytes (dedupe vs downgrade).
+* Apply small **migration overhead** when moving large files to archive tiers.
+* Treat redundancy targets as constraints before calculating savings.
+
+---
+
+# What to paste to Agent (updates the plan docs cleanly)
+
+**Prompt 1 — rename + Visual Map + redundancy + education**
+
+> **Plan update (no code):**
+> Adopt the product name **StorageMap** in all docs. Replace the 2-question onboarding with **one question**: “What do you want to do today?” (View · Suggestions · Plan). Add a persistent **Details** toggle in the header to show/hide technical info.
+> Add a **Visual Map** view alongside List: avatar, device nodes (local), cloud nodes (services), edges sized by linkage, dotted arcs for duplicates, heat tint for waste, Score gauge. Document interactions (tap node, tap duplicate arc, long-press to refresh).
+> Introduce **Redundancy Plan** presets (Essential 1+1, Balanced 1+2, Paranoid 1+3) with controls: Copies (2–4), Important content toggles, Hot vs Cold, and a monthly **Budget** cap. Ensure the engine honors the chosen copies before making suggestions.
+> Add an **Education/Guides** section with per-provider checklists (iOS Photos Optimize, macOS Photos Optimize, Google Photos Storage Saver, Drive Stream files, OneDrive Files On-Demand, Dropbox Smart Sync). Each guide ends with “Mark as done” → triggers **Refresh** and recalculates Score/Savings.
+> Update wireframes and copy to include: **Refresh connections** button with last sync time, **Success** state after cleanup, and **Storage Health Score** (0–100) with a short explainer.
+
+**Prompt 2 — realistic savings rules**
+
+> **Plan tweak (savings realism):**
+> Cap monthly savings at **40%** of current cost unless a cheaper plan is available post-cleanup; no double counting between dedupe and plan changes; subtract a small migration overhead for archive moves; compute “optimal plan” as the smallest tier that fits post-cleanup usage with **15% headroom**. Recompute examples in docs accordingly.
+
+---
+
+If you want, I’ll also draft the exact **copy blocks** for the Visual Map tooltips, the Redundancy presets, and the Success page so you can drop them straight into your `strings.en.json`.
