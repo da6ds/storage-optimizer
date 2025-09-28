@@ -89,25 +89,27 @@ export default function SimulationApp() {
       {/* Persistent checklist */}
       <PersistentChecklist />
 
-      {/* Main content area with safe area padding */}
-      <main className="flex-1 overflow-hidden pb-safe">
-        <Switch>
-          <Route path="/settings" component={SettingsPage} />
-          <Route path="/upgrade" component={UpgradeFlow} />
-          <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
-          <Route path="/connect/device" component={DeviceConnectionPage} />
-          <Route path="/connect/cloud" component={CloudConnectionPage} />
-          <Route path="/map" component={MapView} />
-          <Route path="/duplicates" component={DuplicatesView} />
-          <Route path="/costs" component={CostsView} />
-          <Route path="/actions" component={ActionsView} />
-          <Route path="/diagnostics" component={DiagnosticsView} />
-          <Route path="/plan" component={PlanView} />
-          <Route>
-            {/* Default route - redirect to map */}
-            <RedirectToDefault />
-          </Route>
-        </Switch>
+      {/* Main content area with proper scrolling and safe area padding */}
+      <main className="flex-1 overflow-y-auto pb-safe">
+        <div className="min-h-full">
+          <Switch>
+            <Route path="/settings" component={SettingsPage} />
+            <Route path="/upgrade" component={UpgradeFlow} />
+            <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
+            <Route path="/connect/device" component={DeviceConnectionPage} />
+            <Route path="/connect/cloud" component={CloudConnectionPage} />
+            <Route path="/map" component={MapView} />
+            <Route path="/duplicates" component={DuplicatesView} />
+            <Route path="/costs" component={CostsView} />
+            <Route path="/actions" component={ActionsView} />
+            <Route path="/diagnostics" component={DiagnosticsView} />
+            <Route path="/plan" component={PlanView} />
+            <Route>
+              {/* Default route - redirect to map */}
+              <RedirectToDefault />
+            </Route>
+          </Switch>
+        </div>
       </main>
 
       {/* Bottom navigation */}
