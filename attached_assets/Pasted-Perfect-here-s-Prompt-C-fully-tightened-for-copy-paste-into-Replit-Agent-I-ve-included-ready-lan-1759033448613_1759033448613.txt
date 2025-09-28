@@ -1,0 +1,89 @@
+Perfect — here’s Prompt C, fully tightened for copy-paste into Replit Agent. I’ve included ready landing page copy so it updates /docs/copy.md directly along with the other docs.
+
+⸻
+
+Prompt C — Fix landing, gating, flows + expand savings model & recommendations
+
+(plan only, no code)
+
+Update /docs/copy.md, /docs/wireframes.md, and /docs/ux-flow.md with the following changes:
+
+⸻
+
+Landing Page (for users not logged in):
+	•	Show app name + tagline:
+	•	StorageMap
+	•	See it all. Clean it all.
+	•	Headline: Take control of your storage
+	•	Subcopy: Link your devices and cloud accounts to see all your files in one place. Then, with one tap, let us clean it all up and cut your storage costs — automatically.
+	•	Bullets (expectations):
+	1.	Link this device
+	2.	Link your accounts
+	3.	Optimize your storage
+	•	Primary CTA: Get started → Link this device
+	•	Secondary CTA: Log in → (for existing users)
+
+⸻
+
+Gating / Data Visibility Rules:
+	•	No simulated data, score, or savings shown until at least one device is linked.
+	•	Any suggestive step (“Link this device to begin”) is tappable and routes into the linking flow.
+	•	Visual Map:
+	•	If nothing linked → empty icons only; tapping them routes to connection flow.
+	•	Once linked → icons become interactive (tap = info drawer, long-press = refresh).
+
+⸻
+
+Choose Plan Page:
+	•	Must be scrollable.
+	•	Allow selecting a plan and moving forward to confirm.
+
+⸻
+
+Savings model (simulation + UI):
+	•	Cap monthly savings at ≤ 40% of current spend unless a provable cheaper plan exists post-cleanup.
+	•	No double counting: deduped bytes aren’t counted again for plan downgrades.
+	•	Subtract migration/egress overhead for archive moves (month 1).
+	•	Compute optimal plan as smallest tier that fits post-cleanup usage with 15% headroom.
+	•	If provider = 0 GB, surface “Close or pause account” as optional rec with deep link (never auto-close).
+
+⸻
+
+Actions Page (recommendation set):
+Keep list short, clear, and measurable. Each card shows:
+	•	GB saved
+	•	$/mo impact (after plan change)
+	•	One-time costs (migration/egress, if any)
+
+Recommendations include:
+	•	Remove exact duplicates (count + GB)
+	•	Move large, rarely opened videos to archive
+	•	Keep project files in one place (consolidation)
+	•	Downgrade plan where eligible (show new tier + $/mo delta)
+	•	Close/disable unused provider (only if 0 GB remains; caveats shown)
+
+⸻
+
+Redundancy (respect earlier rules):
+	•	Never drop below chosen copies.
+	•	Convert extras into cold backups instead of deleting.
+	•	Copy explicitly says: “You will still have {{n}} copies after this.”
+
+⸻
+
+Acceptance Criteria:
+	•	Landing page with login + 3 bullets is restored.
+	•	Score/Savings only appear after device link.
+	•	Visual Map gating works (empty state vs interactive state).
+	•	Choose Plan page is scrollable + functional.
+	•	Actions page shows GB/$/one-time cost on every card.
+	•	“Close/disable provider” only shown when usage = 0 GB.
+	•	Redundancy copy is clear and enforced.
+
+⸻
+
+👉 Copy this whole block into Plan mode in Replit Agent.
+
+⸻
+
+Do you also want me to prep the Prompt D (for the full Visual Map build with totals/unique/dupe, file-type breakdown, etc.) right after this, so you can queue them back-to-back?
