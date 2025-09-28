@@ -138,26 +138,84 @@ export default function ActionsView() {
                           {action.description}
                         </CardDescription>
                         
-                        {/* Action metadata - always show savings in simulation */}
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="text-lg font-bold text-green-600 dark:text-green-400" data-testid={`text-action-savings-${action.id}`}>
-                            {formatCurrency(action.estimated_savings_usd)} / month
+                        {/* Enhanced action metadata */}
+                        <div className="space-y-3 mt-3">
+                          {/* Primary savings display */}
+                          <div className="flex items-center justify-between">
+                            <div className="text-lg font-bold text-green-600 dark:text-green-400" data-testid={`text-action-savings-${action.id}`}>
+                              {formatCurrency(action.estimated_savings_usd)} {t('actions.per_month')}
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getFrictionColor(action.friction)}`}
+                              data-testid={`badge-friction-${action.id}`}
+                            >
+                              {t(`actions.friction_levels.${action.friction}`)} effort
+                            </Badge>
                           </div>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${getFrictionColor(action.friction)}`}
-                            data-testid={`badge-friction-${action.id}`}
-                          >
-                            {t(`actions.friction_levels.${action.friction}`)} effort
-                          </Badge>
-                        </div>
 
-                        {/* Simplified summary */}
-                        {showDetails && (
-                          <div className="text-xs text-muted-foreground mt-2">
-                            {action.affected_files.length} files
+                          {/* GB affected and impact details */}
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <div className="text-muted-foreground text-xs">
+                                {action.type === 'dedupe' ? t('actions.gb_saved') :
+                                 action.type === 'cold_storage' ? t('actions.gb_archived') :
+                                 t('actions.gb_affected')}
+                              </div>
+                              <div className="font-medium" data-testid={`text-gb-affected-${action.id}`}>
+                                {(() => {
+                                  const totalGB = action.affected_files.reduce((sum, file) => sum + file.size_bytes, 0) / (1024 * 1024 * 1024);
+                                  if (action.type === 'dedupe') {
+                                    // For dedupe, only count redundant copies (all but one)
+                                    const redundantGB = totalGB * (action.affected_files.length - 1) / action.affected_files.length;
+                                    return redundantGB.toFixed(1);
+                                  }
+                                  return totalGB.toFixed(1);
+                                })()}
+                                {' '}{t('units.gb')}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground text-xs">{t('actions.files_affected')}</div>
+                              <div className="font-medium" data-testid={`text-files-affected-${action.id}`}>
+                                {action.affected_files.length} {action.affected_files.length === 1 ? t('labels.file') : t('labels.files')}
+                              </div>
+                            </div>
                           </div>
-                        )}
+
+                          {/* Migration costs and provider changes */}
+                          {showDetails && action.provider_changes.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="text-xs text-muted-foreground">
+                                <div className="font-medium">{t('actions.provider_changes')}:</div>
+                                <div className="mt-1">
+                                  {action.provider_changes.map((change, idx) => (
+                                    <div key={idx} className="text-xs text-muted-foreground">
+                                      • {change}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {/* One-time migration cost estimate */}
+                              {action.type === 'consolidation' && action.affected_files.length > 0 && (
+                                <div className="text-xs text-amber-600 dark:text-amber-400" data-testid={`text-migration-cost-${action.id}`}>
+                                  {t('actions.migration_cost_note')}: ~{formatCurrency(Math.max(1, action.estimated_savings_usd * 0.1))} {t('actions.one_time')}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Special handling for provider closure actions */}
+                          {action.type === 'consolidation' && action.affected_files.length === 0 && (
+                            <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-md border border-orange-200 dark:border-orange-800">
+                              <div className="text-xs text-orange-700 dark:text-orange-300">
+                                <div className="font-medium">{t('actions.provider_closure_warning')}</div>
+                                <div className="mt-1">{t('actions.closure_caveat')}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
