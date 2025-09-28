@@ -128,7 +128,11 @@
       "low": "Quick and easy to implement",
       "medium": "Requires some manual work",
       "high": "Complex, may need technical expertise"
-    }
+    },
+    "explanation_easy": "These are the top 3 ways to optimize your storage. Start with the recommended option for the biggest impact.",
+    "explanation_standard": "Top optimization recommendations sorted by potential savings. Recommended items offer the best value with manageable effort.",
+    "recommended_badge": "Recommended",
+    "good_choice_badge": "Good choice"
   },
   "diagnostics": {
     "title": "Raw Data & Diagnostics",
@@ -200,6 +204,9 @@
   },
   "labels": {
     "save_per_month": "Estimated savings / month",
+    "potential_monthly_savings": "potential monthly savings",
+    "recommendation": "recommendation",
+    "recommendations": "recommendations",
     "friction": "Friction",
     "risk_note": "Simulation only — no changes made.",
     "sample_pricing": "Sample pricing",

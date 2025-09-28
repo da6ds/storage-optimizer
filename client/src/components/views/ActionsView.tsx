@@ -11,7 +11,13 @@ export default function ActionsView() {
   const { optimizationActions, mode } = useSimulation();
   const { t } = useI18n();
 
-  const totalSavings = optimizationActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+  // Limit to 3-5 items max and sort by savings (avoid mutating original array)
+  const maxItems = mode === 'easy' ? 3 : 5;
+  const sortedActions = [...optimizationActions]
+    .sort((a, b) => b.estimated_savings_usd - a.estimated_savings_usd)
+    .slice(0, maxItems);
+
+  const totalSavings = sortedActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
 
   const getActionIcon = (type: string) => {
     switch (type) {
@@ -47,8 +53,8 @@ export default function ActionsView() {
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
             {formatCurrency(totalSavings)}
           </div>
-          <div className="text-sm text-muted-foreground">
-            {t('labels.save_per_month')}
+          <div className="text-sm text-muted-foreground" data-testid="text-total-savings">
+            {t('labels.potential_monthly_savings')} • {sortedActions.length} {sortedActions.length === 1 ? t('labels.recommendation') : t('labels.recommendations')}
           </div>
         </CardContent>
       </Card>
@@ -57,14 +63,17 @@ export default function ActionsView() {
       <Card>
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">
-            {t(`actions.what_this_means.${mode}`)}
+            {mode === 'easy' 
+              ? t('actions.explanation_easy')
+              : t('actions.explanation_standard')
+            }
           </p>
         </CardContent>
       </Card>
 
       {/* Actions list */}
       <div className="space-y-3">
-        {optimizationActions.length === 0 ? (
+        {sortedActions.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
               <Zap className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
@@ -72,49 +81,65 @@ export default function ActionsView() {
             </CardContent>
           </Card>
         ) : (
-          optimizationActions.map((action) => {
+          sortedActions.map((action, index) => {
             const Icon = getActionIcon(action.type);
+            const isRecommended = index === 0; // Top action is recommended
+            const isSecondary = index === 1; // Second action gets secondary highlight
             
             return (
-              <Card key={action.id} className="hover-elevate">
+              <Card 
+                key={action.id} 
+                className={`hover-elevate ${
+                  isRecommended 
+                    ? 'ring-2 ring-primary bg-primary/5 dark:bg-primary/10' 
+                    : isSecondary 
+                    ? 'ring-1 ring-primary/50 bg-primary/5 dark:bg-primary/10'
+                    : ''
+                }`}
+                data-testid={`card-action-${action.id}`}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3 flex-1">
                       <div className="mt-1">
-                        <Icon className="h-5 w-5 text-primary" />
+                        <Icon className={`h-5 w-5 ${isRecommended ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-base">
-                          {action.title}
-                        </CardTitle>
+                        <div className="flex items-center gap-2 mb-1">
+                          <CardTitle className="text-base">
+                            {action.title}
+                          </CardTitle>
+                          {isRecommended && (
+                            <Badge className="text-xs bg-primary text-primary-foreground">
+                              {t('actions.recommended_badge')}
+                            </Badge>
+                          )}
+                          {isSecondary && (
+                            <Badge variant="outline" className="text-xs border-primary/50 text-primary">
+                              {t('actions.good_choice_badge')}
+                            </Badge>
+                          )}
+                        </div>
                         <CardDescription className="mt-1">
                           {action.description}
                         </CardDescription>
                         
-                        {/* Action metadata */}
-                        <div className="flex items-center space-x-3 mt-2">
-                          <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {/* Simplified metadata */}
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
                             {formatCurrency(action.estimated_savings_usd)} / month
                           </div>
                           <Badge 
                             variant="outline" 
                             className={`text-xs ${getFrictionColor(action.friction)}`}
                           >
-                            {t(`actions.friction_levels.${action.friction}`)} {t('labels.friction')}
+                            {t(`actions.friction_levels.${action.friction}`)} effort
                           </Badge>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-xs">{t('labels.risk_note')}</p>
-                            </TooltipContent>
-                          </Tooltip>
                         </div>
 
-                        {/* Affected files/providers summary */}
+                        {/* Simplified summary */}
                         <div className="text-xs text-muted-foreground mt-2">
-                          Affects {action.affected_files.length} files across {action.provider_changes.length} providers
+                          {action.affected_files.length} files
                         </div>
                       </div>
                     </div>
