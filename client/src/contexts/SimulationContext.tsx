@@ -15,6 +15,20 @@ export type UserGoal = 'view' | 'suggest' | 'plan';
 export type SubscriptionTier = 'free' | 'pro';
 export type SubscriptionPlan = 'one_time' | 'monthly';
 
+export interface ChecklistState {
+  deviceLinked: boolean;
+  cloudAccountsLinked: boolean;
+  optimizeRun: boolean;
+}
+
+export interface ChecklistActions {
+  markDeviceLinked: () => void;
+  markCloudAccountsLinked: () => void;
+  markOptimizeRun: () => void;
+  resetChecklist: () => void;
+  isChecklistComplete: () => boolean;
+}
+
 export interface SubscriptionState {
   tier: SubscriptionTier;
   plan: SubscriptionPlan | null;
@@ -44,6 +58,9 @@ interface SimulationState {
   onboardingComplete: boolean;
   showDetails: boolean;
   
+  // Onboarding checklist
+  checklist: ChecklistState;
+  
   // Subscription management
   subscription: SubscriptionState;
   
@@ -68,6 +85,13 @@ interface SimulationActions {
   refreshData: () => Promise<void>;
   resetOnboarding: () => void;
   toggleDetails: () => void;
+  
+  // Checklist actions
+  markDeviceLinked: () => void;
+  markCloudAccountsLinked: () => void;
+  markOptimizeRun: () => void;
+  resetChecklist: () => void;
+  isChecklistComplete: () => boolean;
   
   // Subscription actions
   upgradeToOneTime: () => void;
@@ -94,6 +118,11 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     goal: null,
     onboardingComplete: false,
     showDetails: false,
+    checklist: {
+      deviceLinked: false,
+      cloudAccountsLinked: false,
+      optimizeRun: false
+    },
     subscription: {
       tier: 'free',
       plan: null,
@@ -135,6 +164,16 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
         setState(prev => ({
           ...prev,
           onboardingComplete: true
+        }));
+      }
+
+      // Restore checklist state
+      const savedChecklist = localStorage.getItem('simulation_checklist');
+      if (savedChecklist) {
+        const parsedChecklist = JSON.parse(savedChecklist);
+        setState(prev => ({
+          ...prev,
+          checklist: parsedChecklist
         }));
       }
     } catch (error) {
@@ -181,6 +220,15 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
       console.warn('Failed to persist onboarding state:', error);
     }
   }, [state.onboardingComplete]);
+
+  // Persist checklist state to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('simulation_checklist', JSON.stringify(state.checklist));
+    } catch (error) {
+      console.warn('Failed to persist checklist state:', error);
+    }
+  }, [state.checklist]);
 
   // Enforce monthly subscription expiration
   useEffect(() => {
@@ -282,6 +330,45 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
       ...prev, 
       showDetails: !prev.showDetails 
     }));
+  };
+
+  // Checklist actions
+  const markDeviceLinked = () => {
+    setState(prev => ({
+      ...prev,
+      checklist: { ...prev.checklist, deviceLinked: true }
+    }));
+  };
+
+  const markCloudAccountsLinked = () => {
+    setState(prev => ({
+      ...prev,
+      checklist: { ...prev.checklist, cloudAccountsLinked: true }
+    }));
+  };
+
+  const markOptimizeRun = () => {
+    setState(prev => ({
+      ...prev,
+      checklist: { ...prev.checklist, optimizeRun: true }
+    }));
+  };
+
+  const resetChecklist = () => {
+    setState(prev => ({
+      ...prev,
+      checklist: {
+        deviceLinked: false,
+        cloudAccountsLinked: false,
+        optimizeRun: false
+      }
+    }));
+  };
+
+  const isChecklistComplete = (): boolean => {
+    return state.checklist.deviceLinked && 
+           state.checklist.cloudAccountsLinked && 
+           state.checklist.optimizeRun;
   };
 
   const refreshData = async () => {
@@ -444,6 +531,11 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     refreshData,
     resetOnboarding,
     toggleDetails,
+    markDeviceLinked,
+    markCloudAccountsLinked,
+    markOptimizeRun,
+    resetChecklist,
+    isChecklistComplete,
     upgradeToOneTime,
     upgradeToMonthly,
     cancelSubscription,
@@ -519,11 +611,7 @@ export function useRouting() {
   const { mode, goal, onboardingComplete } = useSimulation();
 
   const getDefaultRoute = (): string => {
-    if (!onboardingComplete || !mode || !goal) {
-      return '/onboarding';
-    }
-
-    // Fixed navigation - always start with Map tab
+    // Always start with Map tab since we use persistent checklist instead of modal onboarding
     return '/map';
   };
 

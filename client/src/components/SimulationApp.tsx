@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useSimulation, useRouting, useI18n } from '../contexts/SimulationContext';
-import SimulationOnboarding from './SimulationOnboarding';
 import SimulationBottomNav from './SimulationBottomNav';
+import PersistentChecklist from './PersistentChecklist';
 import MapView from './views/MapView';
 import DuplicatesView from './views/DuplicatesView';
 import CostsView from './views/CostsView';
@@ -17,7 +17,7 @@ import UpgradeFlow from './upgrade/UpgradeFlow';
 import SettingsPage from './pages/SettingsPage';
 
 export default function SimulationApp() {
-  const { onboardingComplete, isLoading, error, showDetails, toggleDetails } = useSimulation();
+  const { onboardingComplete, isLoading, error, showDetails, toggleDetails, mode, goal, setUserMode, setUserGoal, completeOnboarding } = useSimulation();
   const { getDefaultRoute } = useRouting();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
@@ -43,9 +43,20 @@ export default function SimulationApp() {
     );
   }
 
-  if (!onboardingComplete) {
-    return <SimulationOnboarding />;
-  }
+  // Skip modal onboarding - users interact with persistent checklist instead
+  // Set default mode/goal and mark onboarding complete if not set to ensure app functionality
+  useEffect(() => {
+    if (!mode) {
+      setUserMode('standard'); // Default to standard mode
+    }
+    if (!goal) {
+      setUserGoal('suggest'); // Default to suggest goal
+    }
+    if (!onboardingComplete) {
+      // Mark onboarding complete since we use persistent checklist
+      completeOnboarding();
+    }
+  }, [mode, goal, onboardingComplete, setUserMode, setUserGoal, completeOnboarding]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -79,10 +90,12 @@ export default function SimulationApp() {
         </div>
       </header>
 
+      {/* Persistent checklist */}
+      <PersistentChecklist />
+
       {/* Main content area with safe area padding */}
       <main className="flex-1 overflow-hidden pb-safe">
         <Switch>
-          <Route path="/onboarding" component={SimulationOnboarding} />
           <Route path="/settings" component={SettingsPage} />
           <Route path="/upgrade" component={UpgradeFlow} />
           <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
@@ -93,7 +106,7 @@ export default function SimulationApp() {
           <Route path="/diagnostics" component={DiagnosticsView} />
           <Route path="/plan" component={PlanView} />
           <Route>
-            {/* Default route based on mode/goal */}
+            {/* Default route - redirect to map */}
             <RedirectToDefault />
           </Route>
         </Switch>
