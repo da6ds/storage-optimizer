@@ -1,0 +1,32 @@
+Prompt A — Onboarding checklist + UI simplification + Actions/Costs rules
+Plan task (no code yet): Replace onboarding with a persistent checklist and simplify the chrome. Update copies and page behaviors.
+Do:
+Replace the current onboarding screen with a persistent checklist that sits at the top of every page until all items are done:
+Link this device (grant local scan permission)
+Link cloud accounts (Drive, iCloud, OneDrive, Dropbox)
+Optimize (run suggestions/plan)
+This checklist persists across Map / Duplicates / Costs / Actions until completed; then it collapses to a small “All set” badge with a Refresh connections button.
+Remove the left config; keep only two header controls:
+Details (button, highlighted when ON; acts as both extra info + tooltips)
+Settings (gear icon) — tapping enters/exits the Settings page (no side drawer).
+Update landing page copy under “See it all. Clean it all.” to:
+“Get a free snapshot of your files across every device and cloud. Then, let us clean it all up and cut your storage costs, automatically.”
+Remove the old “Upgrade later…” line.
+Costs page: show current plan tier for each provider next to the monthly estimate.
+Actions page: every recommendation is selectable even on Free:
+If Free tier → selecting items + tapping bottom CTA triggers the Upgrade flow, then returns to Optimize with those items pre-selected.
+If Paid tier → selecting items + CTA goes straight to Plan preview → Confirm.
+Duplicates page: remove the “cluster” jargon. Use plain categories:
+Exact duplicates (same file)
+Same photo in multiple clouds
+Identical videos
+“Details” ON shows hashes and tie-break logic; OFF shows only counts and the Keep here location.
+Keep Details OFF by default; when ON, reveal formulas, plan math, and raw numbers inline (no tooltips).
+Keep the Refresh connections control in the header (modal with last sync + status).
+Deliverables to update: /docs/ux-flow.md, /docs/navigation.md, /docs/wireframes.md, /docs/copy.md.
+Acceptance (for this plan step):
+Checklist spec appears on all pages with completion rules and collapsed state.
+Copies updated exactly as specified.
+Costs shows current plan tiers.
+Actions selection logic documented for Free vs Paid.
+Duplicates uses the three simple categories; “Details” behavior is defined.
