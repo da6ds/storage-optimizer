@@ -236,15 +236,7 @@ function VisualMapView({
   const { shouldShowSavings, getGatingMessage } = useSimulation();
   const gatingMessage = getGatingMessage();
 
-  // Get device icon based on type
-  const getDeviceIcon = (type: string) => {
-    switch (type) {
-      case 'phone': return Smartphone;
-      case 'tablet': return Monitor;
-      case 'laptop': return HardDrive;
-      default: return Smartphone;
-    }
-  };
+  // Use the standalone getDeviceIcon helper
 
   // Mock device data - in real implementation this would come from simulation context
   const devices = [
@@ -335,7 +327,7 @@ function VisualMapView({
         </div>
 
         {/* Connection Lines */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
+        <svg className="absolute inset-0 w-full h-full pointer-events-none text-muted-foreground" style={{ zIndex: 0 }}>
           {/* Cloud connections */}
           {clouds.map((_, index) => (
             <line
@@ -344,7 +336,7 @@ function VisualMapView({
               y1="50%"
               x2={`${50 + (index - clouds.length/2 + 0.5) * 20}%`}
               y2="25%"
-              stroke="rgb(148 163 184)"
+              stroke="currentColor"
               strokeWidth="2"
               strokeDasharray="5,5"
               opacity="0.6"
@@ -358,7 +350,7 @@ function VisualMapView({
               y1="50%"
               x2={`${50 + (index - devices.length/2 + 0.5) * 20}%`}
               y2="75%"
-              stroke="rgb(148 163 184)"
+              stroke="currentColor"
               strokeWidth="3"
               opacity="0.8"
             />
@@ -386,7 +378,7 @@ function CloudNode({ provider, showDetails, index }: {
     <Card className="w-32 hover-elevate cursor-pointer" data-testid={`node-cloud-${provider.provider}`}>
       <CardContent className="p-3 text-center">
         <div className="flex flex-col items-center space-y-2">
-          <Cloud className="h-6 w-6 text-blue-500" />
+          <Cloud className="h-6 w-6 text-primary" />
           <div>
             <div className="text-sm font-medium">{t(`providers.${provider.provider}`)}</div>
             {showDetails && (
@@ -399,7 +391,7 @@ function CloudNode({ provider, showDetails, index }: {
                 </div>
                 <div className="w-full bg-muted rounded-full h-1 mt-1">
                   <div 
-                    className="bg-blue-500 h-1 rounded-full" 
+                    className="bg-primary h-1 rounded-full" 
                     style={{ width: `${percentFull}%` }}
                   />
                 </div>
@@ -412,7 +404,7 @@ function CloudNode({ provider, showDetails, index }: {
                     <div className="flex h-1 w-full bg-muted rounded-full overflow-hidden">
                       {Object.entries(fileTypes).map(([type, stats]: [string, any], idx) => {
                         const percent = (stats.size_gb / totalSize) * 100;
-                        const colors = ['bg-primary', 'bg-secondary', 'bg-accent', 'bg-muted-foreground'];
+                        const colors = ['bg-primary', 'bg-secondary', 'bg-accent', 'bg-muted'];
                         return (
                           <div
                             key={type}
@@ -454,7 +446,7 @@ function DeviceNode({ device, showDetails, index }: {
     <Card className="w-32 hover-elevate cursor-pointer" data-testid={`node-device-${device.id}`}>
       <CardContent className="p-3 text-center">
         <div className="flex flex-col items-center space-y-2">
-          <DeviceIcon className="h-6 w-6 text-gray-600" />
+          <DeviceIcon className="h-6 w-6 text-foreground" />
           <div>
             <div className="text-sm font-medium">{device.name}</div>
             {showDetails && (
@@ -462,7 +454,7 @@ function DeviceNode({ device, showDetails, index }: {
                 <div className="text-xs text-muted-foreground">{device.used}</div>
                 <div className="w-full bg-muted rounded-full h-1 mt-1">
                   <div 
-                    className="bg-gray-500 h-1 rounded-full" 
+                    className="bg-secondary h-1 rounded-full" 
                     style={{ width: `${device.percentFull}%` }}
                   />
                 </div>
@@ -491,7 +483,7 @@ function DeviceNode({ device, showDetails, index }: {
                       aria-label="Documents: 16%"
                     />
                     <div 
-                      className="bg-muted-foreground" 
+                      className="bg-muted" 
                       style={{ width: `${mockFileTypes.other.percent}%` }}
                       title="Other: 12%"
                       aria-label="Other: 12%"
