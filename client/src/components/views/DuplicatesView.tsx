@@ -1,20 +1,56 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Copy } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, Image, Video, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
+import type { DuplicateCluster, SimulatedFile } from '../../../../shared/simulation';
+
+// Helper function to get file category from MIME type
+const getFileCategory = (mimeType: string): 'image' | 'video' | 'other' => {
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  return 'other';
+};
+
+// Helper function to categorize duplicate clusters
+const categorizeDuplicates = (clusters: DuplicateCluster[]) => {
+  const categories = {
+    photos: [] as DuplicateCluster[],
+    videos: [] as DuplicateCluster[],
+    other: [] as DuplicateCluster[]
+  };
+  
+  clusters.forEach(cluster => {
+    const firstFile = cluster.files[0];
+    const category = getFileCategory(firstFile.mime);
+    
+    if (category === 'image') {
+      categories.photos.push(cluster);
+    } else if (category === 'video') {
+      categories.videos.push(cluster);
+    } else {
+      categories.other.push(cluster);
+    }
+  });
+  
+  return categories;
+};
 
 export default function DuplicatesView() {
   const { duplicateClusters, mode } = useSimulation();
   const { t } = useI18n();
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['photos', 'videos', 'other']));
 
   const totalDuplicates = duplicateClusters.reduce((sum, cluster) => sum + cluster.files.length - 1, 0);
   const totalSavings = duplicateClusters.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0);
+  
+  // Categorize duplicates by type
+  const categorizedDuplicates = categorizeDuplicates(duplicateClusters);
 
   const toggleCluster = (hash: string) => {
     const newExpanded = new Set(expandedClusters);
@@ -24,6 +60,16 @@ export default function DuplicatesView() {
       newExpanded.add(hash);
     }
     setExpandedClusters(newExpanded);
+  };
+
+  const toggleCategory = (category: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
   };
 
   return (
@@ -70,8 +116,8 @@ export default function DuplicatesView() {
         </CardContent>
       </Card>
 
-      {/* Duplicate clusters */}
-      <div className="space-y-3">
+      {/* Categorized duplicate clusters */}
+      <div className="space-y-4">
         {duplicateClusters.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
@@ -80,78 +126,301 @@ export default function DuplicatesView() {
             </CardContent>
           </Card>
         ) : (
-          duplicateClusters.map((cluster) => (
-            <Card key={cluster.hash}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-base">
-                      {cluster.files[0].path.split('/').pop() || 'Unknown file'}
-                    </CardTitle>
-                    <CardDescription>
-                      {t('duplicates.cluster_info', {
-                        count: cluster.files.length,
-                        providers: cluster.provider_count
-                      })}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="text-xs">
-                      {formatCurrency(cluster.potential_savings_usd)} savings
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleCluster(cluster.hash)}
-                      data-testid={`button-toggle-cluster-${cluster.hash}`}
-                    >
-                      {expandedClusters.has(cluster.hash) ? (
-                        <><ChevronDown className="h-4 w-4" /> {t('duplicates.collapse_cluster')}</>
+          <>
+            {/* Same photos in multiple clouds */}
+            {categorizedDuplicates.photos.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3 cursor-pointer" onClick={() => toggleCategory('photos')}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Image className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <CardTitle className="text-lg">Same photos in multiple clouds</CardTitle>
+                        <CardDescription>
+                          {categorizedDuplicates.photos.length} photo groups • {formatCurrency(categorizedDuplicates.photos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      {expandedCategories.has('photos') ? (
+                        <ChevronDown className="h-4 w-4" />
                       ) : (
-                        <><ChevronRight className="h-4 w-4" /> {t('duplicates.expand_cluster')}</>
+                        <ChevronRight className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
-                </div>
-              </CardHeader>
-
-              {expandedClusters.has(cluster.hash) && (
-                <CardContent className="pt-0">
-                  <div className="space-y-2">
-                    {cluster.files.map((file) => (
-                      <div
-                        key={file.id}
-                        className={`flex items-center justify-between p-2 rounded border ${
-                          file.id === cluster.recommended_keeper.id 
-                            ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
-                            : 'bg-muted/50'
-                        }`}
-                      >
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">
-                            {t(`providers.${file.provider}`)}
+                </CardHeader>
+                
+                {expandedCategories.has('photos') && (
+                  <CardContent className="pt-0 space-y-3">
+                    {categorizedDuplicates.photos.map((cluster) => (
+                      <div key={cluster.hash} className="border rounded-lg">
+                        <div className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {cluster.files[0].path.split('/').pop() || 'Unknown photo'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {formatCurrency(cluster.potential_savings_usd)} savings
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleCluster(cluster.hash)}
+                                data-testid={`button-toggle-cluster-${cluster.hash}`}
+                              >
+                                {expandedClusters.has(cluster.hash) ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {file.path}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-muted-foreground">
-                            {formatFileSize(file.size_bytes)}
-                          </span>
-                          {file.id === cluster.recommended_keeper.id && (
-                            <Badge variant="secondary" className="text-xs">
-                              {t('duplicates.keep_here_badge')}
-                            </Badge>
+                          
+                          {expandedClusters.has(cluster.hash) && (
+                            <div className="mt-3 space-y-2">
+                              {cluster.files.map((file: SimulatedFile) => (
+                                <div
+                                  key={file.id}
+                                  className={`flex items-center justify-between p-2 rounded border ${
+                                    file.id === cluster.recommended_keeper.id 
+                                      ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                                      : 'bg-muted/50'
+                                  }`}
+                                >
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm">
+                                      {t(`providers.${file.provider}`)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {file.path}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatFileSize(file.size_bytes)}
+                                    </span>
+                                    {file.id === cluster.recommended_keeper.id && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        Keep here
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </div>
                       </div>
                     ))}
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
+            {/* Identical videos */}
+            {categorizedDuplicates.videos.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3 cursor-pointer" onClick={() => toggleCategory('videos')}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Video className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <CardTitle className="text-lg">Identical videos</CardTitle>
+                        <CardDescription>
+                          {categorizedDuplicates.videos.length} video groups • {formatCurrency(categorizedDuplicates.videos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      {expandedCategories.has('videos') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                </CardContent>
-              )}
-            </Card>
-          ))
+                </CardHeader>
+                
+                {expandedCategories.has('videos') && (
+                  <CardContent className="pt-0 space-y-3">
+                    {categorizedDuplicates.videos.map((cluster) => (
+                      <div key={cluster.hash} className="border rounded-lg">
+                        <div className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {cluster.files[0].path.split('/').pop() || 'Unknown video'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {formatCurrency(cluster.potential_savings_usd)} savings
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleCluster(cluster.hash)}
+                                data-testid={`button-toggle-cluster-${cluster.hash}`}
+                              >
+                                {expandedClusters.has(cluster.hash) ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {expandedClusters.has(cluster.hash) && (
+                            <div className="mt-3 space-y-2">
+                              {cluster.files.map((file: SimulatedFile) => (
+                                <div
+                                  key={file.id}
+                                  className={`flex items-center justify-between p-2 rounded border ${
+                                    file.id === cluster.recommended_keeper.id 
+                                      ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                                      : 'bg-muted/50'
+                                  }`}
+                                >
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm">
+                                      {t(`providers.${file.provider}`)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {file.path}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatFileSize(file.size_bytes)}
+                                    </span>
+                                    {file.id === cluster.recommended_keeper.id && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        Keep here
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
+            {/* Exact duplicates (other files) */}
+            {categorizedDuplicates.other.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3 cursor-pointer" onClick={() => toggleCategory('other')}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <div>
+                        <CardTitle className="text-lg">Exact duplicates</CardTitle>
+                        <CardDescription>
+                          {categorizedDuplicates.other.length} file groups • {formatCurrency(categorizedDuplicates.other.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      {expandedCategories.has('other') ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+                
+                {expandedCategories.has('other') && (
+                  <CardContent className="pt-0 space-y-3">
+                    {categorizedDuplicates.other.map((cluster) => (
+                      <div key={cluster.hash} className="border rounded-lg">
+                        <div className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {cluster.files[0].path.split('/').pop() || 'Unknown file'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {formatCurrency(cluster.potential_savings_usd)} savings
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleCluster(cluster.hash)}
+                                data-testid={`button-toggle-cluster-${cluster.hash}`}
+                              >
+                                {expandedClusters.has(cluster.hash) ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {expandedClusters.has(cluster.hash) && (
+                            <div className="mt-3 space-y-2">
+                              {cluster.files.map((file: SimulatedFile) => (
+                                <div
+                                  key={file.id}
+                                  className={`flex items-center justify-between p-2 rounded border ${
+                                    file.id === cluster.recommended_keeper.id 
+                                      ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                                      : 'bg-muted/50'
+                                  }`}
+                                >
+                                  <div className="flex-1">
+                                    <div className="font-medium text-sm">
+                                      {t(`providers.${file.provider}`)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {file.path}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatFileSize(file.size_bytes)}
+                                    </span>
+                                    {file.id === cluster.recommended_keeper.id && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        Keep here
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                )}
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>
