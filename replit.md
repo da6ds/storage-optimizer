@@ -1,8 +1,8 @@
-# File Inventory & Optimization Tool
+# StorageMap
 
 ## Overview
 
-A mobile-first progressive web application that helps users optimize their cloud storage costs across multiple providers (Google Drive, Dropbox, OneDrive, iCloud, and local storage). The app features an intelligent onboarding system that customizes the user experience based on technical familiarity and goals, providing tailored views for file management, cost optimization, and automated planning recommendations.
+A mobile-first progressive web application that helps users take control of their storage. StorageMap lets users link their devices and cloud accounts to see all their files in one place, then optimize and cut their storage costs automatically across multiple providers (Google Drive, Dropbox, OneDrive, iCloud, and local storage). The app features an intelligent onboarding system that customizes the user experience based on technical familiarity and goals, providing tailored views for file management, cost optimization, and automated planning recommendations.
 
 The application operates in simulation mode with mock data to demonstrate functionality without requiring real provider credentials or making actual changes to user files.
 

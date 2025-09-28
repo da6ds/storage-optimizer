@@ -199,7 +199,7 @@ export default function SettingsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center text-sm text-muted-foreground">
-                <p>File Inventory Optimizer • Simulation Mode</p>
+                <p>StorageMap • Simulation Mode</p>
                 <p className="mt-1">All features are simulated for demonstration purposes</p>
               </div>
             </CardContent>

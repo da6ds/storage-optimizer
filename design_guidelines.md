@@ -1,4 +1,4 @@
-# File Inventory & Optimization Tool - Design Guidelines
+# StorageMap - Design Guidelines
 
 ## Design Approach: Design System-Based (Material Design)
 **Justification**: This is a utility-focused, information-dense application requiring efficiency and learnability. Material Design provides excellent patterns for data visualization, progressive disclosure, and mobile-first experiences.
