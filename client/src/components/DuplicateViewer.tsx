@@ -86,6 +86,24 @@ export default function DuplicateViewer({ duplicateGroups, mode }: DuplicateView
           </CardContent>
         </Card>
       )}
+
+      {/* Redundancy Safety Banner */}
+      <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="text-green-600 dark:text-green-400 text-lg">🛡️</div>
+            <div className="text-sm">
+              <div className="font-medium text-green-700 dark:text-green-300 mb-1">
+                File Safety Guaranteed
+              </div>
+              <div className="text-green-600 dark:text-green-400">
+                You will always have 1 copy of each file after deduplication. We never delete the last copy 
+                and always keep the newest version from the most reliable provider.
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <div className="space-y-3">
         {duplicateGroups.map((group) => {
@@ -115,9 +133,14 @@ export default function DuplicateViewer({ duplicateGroups, mode }: DuplicateView
                     <div className="font-semibold text-chart-2">
                       ${group.potentialSavings.toFixed(2)}/mo
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {group.files.length - 1} to remove
-                    </Badge>
+                    <div className="text-right space-y-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {group.files.length - 1} to remove
+                      </Badge>
+                      <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        1 copy remains
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardHeader>

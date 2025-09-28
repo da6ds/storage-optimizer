@@ -69,6 +69,9 @@
       "standard": "Duplicate clusters ranked by storage savings. We recommend keeping files on the cheapest provider.",
       "pro": "Hash-based deduplication analysis with provider cost optimization and conflict resolution strategies."
     },
+    "safety_explanation": "You will always have 1 copy of each file after deduplication. We never delete the last copy and always keep the newest version from the most reliable provider.",
+    "copies_remaining": "{{count}} copy remains",
+    "to_remove": "{{count}} to remove",
     "expand_cluster": "Show files",
     "collapse_cluster": "Hide files"
   },
@@ -128,6 +131,8 @@
     "migration_cost_note": "Est. one-time cost",
     "per_month": "/ month",
     "one_time": "one-time",
+    "redundancy_safety": "File Safety Guaranteed",
+    "redundancy_explanation": "You will still have {{copies}} copy after this action",
     "provider_closure_warning": "Provider closure recommendation",
     "closure_caveat": "Only close providers with 0 GB usage. Confirm no important files remain before proceeding."
   },

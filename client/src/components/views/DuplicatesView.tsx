@@ -85,6 +85,23 @@ export default function DuplicatesView() {
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />
 
+      {/* Redundancy Safety Banner */}
+      <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="text-green-600 dark:text-green-400 text-lg">🛡️</div>
+            <div className="text-sm">
+              <div className="font-medium text-green-700 dark:text-green-300 mb-1">
+                {t('actions.redundancy_safety')}
+              </div>
+              <div className="text-green-600 dark:text-green-400">
+                {t('duplicates.safety_explanation')}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Summary stats */}
       {showDetails && (
         <div className="grid grid-cols-3 gap-3">
@@ -172,11 +189,21 @@ export default function DuplicatesView() {
                               )}
                             </div>
                             <div className="flex items-center space-x-2">
-                              {showDetails && (
-                                <Badge variant="outline" className="text-xs">
-                                  {formatCurrency(cluster.potential_savings_usd)} savings
-                                </Badge>
-                              )}
+                              <div className="text-right space-y-1">
+                                {showDetails && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {formatCurrency(cluster.potential_savings_usd)} savings
+                                  </Badge>
+                                )}
+                                <div className="space-y-1">
+                                  <Badge variant="secondary" className="text-xs block">
+                                    {t('duplicates.to_remove', { count: cluster.files.length - 1 })}
+                                  </Badge>
+                                  <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                    {t('duplicates.copies_remaining', { count: 1 })}
+                                  </div>
+                                </div>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="sm"

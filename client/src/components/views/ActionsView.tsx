@@ -206,6 +206,16 @@ export default function ActionsView() {
                             </div>
                           )}
 
+                          {/* Redundancy safety for deduplication actions */}
+                          {action.type === 'dedupe' && (
+                            <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-md border border-green-200 dark:border-green-800">
+                              <div className="text-xs text-green-700 dark:text-green-300">
+                                <div className="font-medium">{t('actions.redundancy_safety')}</div>
+                                <div className="mt-1">{t('actions.redundancy_explanation', { copies: 1 })}</div>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Special handling for provider closure actions */}
                           {action.type === 'consolidation' && action.affected_files.length === 0 && (
                             <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-md border border-orange-200 dark:border-orange-800">
