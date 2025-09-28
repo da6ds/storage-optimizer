@@ -7,7 +7,7 @@
   },
   "onboarding": {
     "title": "See it all. Clean it all.",
-    "subtitle": "Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.",
+    "subtitle": "Get a free snapshot of your files across every device and cloud. Then, let us clean it all up and cut your storage costs, automatically.",
     "q_single": "What do you want to do today?",
     "goal": {
       "view": "View",
@@ -19,8 +19,7 @@
       "suggest": "Show me ways to save money",
       "plan": "Make a plan to optimize everything"
     },
-    "button_continue": "Continue → See My Storage",
-    "upgrade_footnote": "Upgrade later to let the app fix it all for you."
+    "button_continue": "Continue → See My Storage"
   },
   "navigation": {
     "map": "Map",

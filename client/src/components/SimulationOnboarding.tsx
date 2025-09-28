@@ -93,12 +93,6 @@ export default function SimulationOnboarding() {
             </Button>
           </div>
         </Card>
-
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            {t('onboarding.upgrade_footnote')}
-          </p>
-        </div>
       </div>
     </div>
   );
