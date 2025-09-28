@@ -11,14 +11,12 @@ import CostsView from './views/CostsView';
 import ActionsView from './views/ActionsView';
 import DiagnosticsView from './views/DiagnosticsView';
 import PlanView from './views/PlanView';
-import ModeGoalIndicator from './ModeGoalIndicator';
 import LoadingScreen from './LoadingScreen';
 import UpgradeFlow from './upgrade/UpgradeFlow';
 import SettingsPage from './pages/SettingsPage';
 
 export default function SimulationApp() {
   const { onboardingComplete, isLoading, error, showDetails, toggleDetails, mode, goal, setUserMode, setUserGoal, completeOnboarding } = useSimulation();
-  const { getDefaultRoute } = useRouting();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
 
@@ -60,33 +58,27 @@ export default function SimulationApp() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      {/* Header with mode/goal indicator */}
+      {/* Simplified header with only Details and Settings */}
       <header className="flex-none border-b bg-card">
-        <div className="flex items-center justify-between p-3 md:p-4">
-          <div>
-            <h1 className="text-lg font-semibold">{t('app.title')}</h1>
-            <p className="text-xs text-muted-foreground">{t('app.subtitle')}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <ModeGoalIndicator />
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="text-xs"
-              onClick={toggleDetails}
-              data-testid="button-details-toggle"
-            >
-              Details {showDetails ? '☑' : '☐'}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setLocation('/settings')}
-              data-testid="button-settings"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
+        <div className="flex items-center justify-end p-3 md:p-4 gap-2">
+          <Button 
+            variant={showDetails ? "default" : "ghost"}
+            size="sm"
+            className="text-xs"
+            onClick={toggleDetails}
+            data-testid="button-details-toggle"
+          >
+            Details
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setLocation('/settings')}
+            aria-label="Open settings"
+            data-testid="button-settings"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
         </div>
       </header>
 
