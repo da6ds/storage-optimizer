@@ -10,6 +10,7 @@ import DiagnosticsView from './views/DiagnosticsView';
 import PlanView from './views/PlanView';
 import ModeGoalIndicator from './ModeGoalIndicator';
 import LoadingScreen from './LoadingScreen';
+import UpgradeFlow from './upgrade/UpgradeFlow';
 
 export default function SimulationApp() {
   const { onboardingComplete, isLoading, error } = useSimulation();
@@ -58,6 +59,8 @@ export default function SimulationApp() {
       <main className="flex-1 overflow-hidden pb-safe">
         <Switch>
           <Route path="/onboarding" component={SimulationOnboarding} />
+          <Route path="/upgrade" component={UpgradeFlow} />
+          <Route path="/upgrade/:subpath*" component={UpgradeFlow} />
           <Route path="/map" component={MapView} />
           <Route path="/duplicates" component={DuplicatesView} />
           <Route path="/costs" component={CostsView} />

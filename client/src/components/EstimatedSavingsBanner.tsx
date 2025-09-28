@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { useSimulation } from '../contexts/SimulationContext';
 import { formatCurrency } from '../../../shared/simulation';
 
@@ -10,6 +11,7 @@ interface EstimatedSavingsBannerProps {
 
 export default function EstimatedSavingsBanner({ onUpgradeClick }: EstimatedSavingsBannerProps) {
   const { isProUser, getPotentialSavings } = useSimulation();
+  const [, setLocation] = useLocation();
   
   // Don't show banner for pro users
   if (isProUser()) {
@@ -27,8 +29,7 @@ export default function EstimatedSavingsBanner({ onUpgradeClick }: EstimatedSavi
     if (onUpgradeClick) {
       onUpgradeClick();
     } else {
-      // TODO: Navigate to upgrade flow (will implement in task 5)
-      console.log('Navigate to upgrade flow');
+      setLocation('/upgrade');
     }
   };
 
