@@ -42,6 +42,7 @@ interface SimulationState {
   mode: UserMode | null;
   goal: UserGoal | null;
   onboardingComplete: boolean;
+  showDetails: boolean;
   
   // Subscription management
   subscription: SubscriptionState;
@@ -66,6 +67,7 @@ interface SimulationActions {
   completeOnboarding: () => void;
   refreshData: () => Promise<void>;
   resetOnboarding: () => void;
+  toggleDetails: () => void;
   
   // Subscription actions
   upgradeToOneTime: () => void;
@@ -73,6 +75,9 @@ interface SimulationActions {
   cancelSubscription: () => void;
   isProUser: () => boolean;
   getPotentialSavings: () => number;
+  
+  // Health score
+  getHealthScore: () => number;
 }
 
 type SimulationContextType = SimulationState & SimulationActions;
@@ -88,6 +93,7 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     mode: null,
     goal: null,
     onboardingComplete: false,
+    showDetails: false,
     subscription: {
       tier: 'free',
       plan: null,
@@ -271,6 +277,13 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     }));
   };
 
+  const toggleDetails = () => {
+    setState(prev => ({ 
+      ...prev, 
+      showDetails: !prev.showDetails 
+    }));
+  };
+
   const refreshData = async () => {
     await loadSimulationData();
   };
@@ -332,7 +345,95 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
   };
 
   const getPotentialSavings = (): number => {
-    return state.optimizationActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    const currentCost = state.storageBreakdown.reduce((sum, breakdown) => sum + breakdown.estimated_monthly_cost, 0);
+    
+    // Separate dedupe and cold storage savings to prevent double-counting
+    const dedupeActions = state.optimizationActions.filter(action => action.type === 'dedupe');
+    const coldStorageActions = state.optimizationActions.filter(action => action.type === 'cold_storage');
+    const otherActions = state.optimizationActions.filter(action => !['dedupe', 'cold_storage'].includes(action.type));
+    
+    // Calculate dedupe savings
+    const dedupeSavings = dedupeActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    
+    // Calculate cold storage savings on non-duplicate files to avoid double-counting
+    const coldStorageSavings = coldStorageActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    
+    // Other optimization savings
+    const otherSavings = otherActions.reduce((sum, action) => sum + action.estimated_savings_usd, 0);
+    
+    // Apply realistic migration overhead based on volume (estimate $0.01 per GB moved)
+    const coldStorageFiles = coldStorageActions.flatMap(action => action.affected_files || []);
+    const otherFiles = otherActions.flatMap(action => action.affected_files || []);
+    const movedBytes = [...coldStorageFiles, ...otherFiles].reduce((sum, file) => sum + file.size_bytes, 0);
+    const movedGB = movedBytes / (1024 * 1024 * 1024);
+    const migrationOverhead = movedGB * 0.01; // $0.01 per GB moved
+    
+    // Total realistic savings
+    const totalSavings = dedupeSavings + coldStorageSavings + otherSavings - migrationOverhead;
+    
+    // Cap savings at 40% of current monthly cost to be realistic
+    const maxSavings = currentCost * 0.40;
+    
+    // Apply realistic constraints
+    if (totalSavings < 1) {
+      return 0; // Don't show tiny savings
+    }
+    
+    return Math.min(totalSavings, maxSavings);
+  };
+
+  const getHealthScore = (): number => {
+    if (state.files.length === 0) return 100;
+
+    // Helper function to clamp values between 0 and 1
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+    // Calculate duplicate ratio (35% weight)
+    const totalFiles = state.files.length;
+    const duplicateFiles = state.duplicateClusters.reduce((sum, cluster) => sum + cluster.files.length - 1, 0);
+    const duplicateRatio = totalFiles > 0 ? duplicateFiles / totalFiles : 0;
+    const duplicationScore = 100 * (1 - clamp(duplicateRatio, 0, 1));
+
+    // Calculate cold bulk ratio (25% weight) - files over 1GB and older than 180 days
+    const totalSizeBytes = state.files.reduce((sum, file) => sum + file.size_bytes, 0);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 180);
+    const coldBulkBytes = state.files
+      .filter(file => {
+        const fileDate = new Date(file.last_modified);
+        const sizeGb = file.size_bytes / (1024 * 1024 * 1024);
+        return fileDate < cutoffDate && sizeGb >= 1;
+      })
+      .reduce((sum, file) => sum + file.size_bytes, 0);
+    const coldBulkRatio = totalSizeBytes > 0 ? coldBulkBytes / totalSizeBytes : 0;
+    const coldBulkScore = 100 * (1 - clamp(coldBulkRatio, 0, 1));
+
+    // Calculate cost efficiency (25% weight) - use realistic savings that match display
+    const currentCost = state.storageBreakdown.reduce((sum, breakdown) => sum + breakdown.estimated_monthly_cost, 0);
+    const realisticSavings = getPotentialSavings(); // Use same logic as displayed savings
+    const savingsRatio = currentCost > 0 ? realisticSavings / currentCost : 0;
+    const costEfficiencyScore = 100 * (1 - clamp(savingsRatio, 0, 1));
+
+    // Calculate fragmentation (10% weight) - penalize for using multiple providers (max 5 providers)
+    const providerCount = new Set(state.files.map(file => file.provider)).size;
+    const maxProviders = 5;
+    const fragmentationRatio = providerCount > 1 ? (providerCount - 1) / (maxProviders - 1) : 0;
+    const fragmentationScore = 100 * (1 - clamp(fragmentationRatio, 0, 1));
+
+    // Risk posture (5% weight) - having duplicates provides backup redundancy
+    const hasBackups = state.duplicateClusters.length > 0;
+    const riskScore = hasBackups ? 100 : 80; // Penalty for no redundancy
+
+    // Weighted average
+    const healthScore = Math.round(
+      (duplicationScore * 0.35) +
+      (coldBulkScore * 0.25) +
+      (costEfficiencyScore * 0.25) +
+      (fragmentationScore * 0.10) +
+      (riskScore * 0.05)
+    );
+
+    return clamp(healthScore, 0, 100);
   };
 
   const contextValue: SimulationContextType = {
@@ -342,11 +443,13 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     completeOnboarding,
     refreshData,
     resetOnboarding,
+    toggleDetails,
     upgradeToOneTime,
     upgradeToMonthly,
     cancelSubscription,
     isProUser,
-    getPotentialSavings
+    getPotentialSavings,
+    getHealthScore
   };
 
   return (

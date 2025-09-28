@@ -17,7 +17,7 @@ import UpgradeFlow from './upgrade/UpgradeFlow';
 import SettingsPage from './pages/SettingsPage';
 
 export default function SimulationApp() {
-  const { onboardingComplete, isLoading, error } = useSimulation();
+  const { onboardingComplete, isLoading, error, showDetails, toggleDetails } = useSimulation();
   const { getDefaultRoute } = useRouting();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
@@ -54,10 +54,19 @@ export default function SimulationApp() {
         <div className="flex items-center justify-between p-3 md:p-4">
           <div>
             <h1 className="text-lg font-semibold">{t('app.title')}</h1>
-            <p className="text-xs text-muted-foreground">{t('app.simulation_mode')}</p>
+            <p className="text-xs text-muted-foreground">{t('app.subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             <ModeGoalIndicator />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-xs"
+              onClick={toggleDetails}
+              data-testid="button-details-toggle"
+            >
+              Details {showDetails ? '☑' : '☐'}
+            </Button>
             <Button 
               variant="ghost" 
               size="icon"

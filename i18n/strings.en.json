@@ -1,27 +1,16 @@
 {
   "app": {
-    "title": "File Inventory Optimizer",
-    "subtitle": "Smart Cloud Storage Management", 
+    "title": "StorageMap",
+    "subtitle": "See it all. Clean it all.", 
     "description": "Optimize your cloud storage costs across Google Drive, Dropbox, OneDrive, and iCloud",
     "simulation_mode": "Simulation Mode"
   },
   "onboarding": {
     "title": "See it all. Clean it all.",
     "subtitle": "Get a free snapshot of your files across every device and cloud. Then, with one tap, let us clean up duplicates and cut your storage costs automatically.",
-    "q_familiarity": "Familiarity",
-    "familiarity": {
-      "easy": "Easy",
-      "standard": "Standard", 
-      "pro": "Pro"
-    },
-    "familiarity_help": {
-      "easy": "Simple view with clear recommendations",
-      "standard": "Balanced view with helpful details",
-      "pro": "Full technical details and controls"
-    },
-    "q_goal": "Goal",
+    "q_single": "What do you want to do today?",
     "goal": {
-      "view": "View only",
+      "view": "View",
       "suggest": "Suggestions",
       "plan": "Plan"
     },
@@ -30,7 +19,6 @@
       "suggest": "Show me ways to save money",
       "plan": "Make a plan to optimize everything"
     },
-    "button_next": "Continue",
     "button_continue": "Continue → See My Storage",
     "upgrade_footnote": "Upgrade later to let the app fix it all for you."
   },
@@ -54,8 +42,8 @@
     "change": "Change Goal"
   },
   "map": {
-    "title": "Storage Overview",
-    "subtitle": "Your files across all providers",
+    "title": "Map",
+    "subtitle": "Your storage at a glance",
     "provider_tiles_title": "Provider Summary",
     "storage_breakdown_title": "Storage by File Type",
     "what_this_means": {
@@ -101,8 +89,8 @@
     "total_monthly": "Total monthly estimate"
   },
   "actions": {
-    "title": "Optimization Actions",
-    "subtitle": "Recommended ways to save money",
+    "title": "Actions",
+    "subtitle": "Simple ways to save money",
     "no_actions": "No optimization opportunities found",
     "plan_savings_cta": "Plan my savings",
     "plan_disabled_tooltip": "This is a simulation - no actual changes can be made",

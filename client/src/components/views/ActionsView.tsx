@@ -6,6 +6,7 @@ import { Zap, AlertCircle, Copy, Archive, FolderOpen } from 'lucide-react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
+import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function ActionsView() {
   const { optimizationActions, mode } = useSimulation();
@@ -43,6 +44,9 @@ export default function ActionsView() {
         <h1 className="text-2xl font-bold">{t('actions.title')}</h1>
         <p className="text-muted-foreground">{t('actions.subtitle')}</p>
       </div>
+
+      {/* Health Score */}
+      <HealthScoreDisplay />
 
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />

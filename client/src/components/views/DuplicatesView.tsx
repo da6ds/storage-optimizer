@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 import { formatFileSize, formatCurrency } from '../../../../shared/simulation';
 import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
+import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function DuplicatesView() {
   const { duplicateClusters, mode } = useSimulation();
@@ -31,6 +32,9 @@ export default function DuplicatesView() {
         <h1 className="text-2xl font-bold">{t('duplicates.title')}</h1>
         <p className="text-muted-foreground">{t('duplicates.subtitle')}</p>
       </div>
+
+      {/* Health Score */}
+      <HealthScoreDisplay />
 
       {/* Estimated Savings Banner */}
       <EstimatedSavingsBanner />

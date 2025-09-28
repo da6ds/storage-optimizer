@@ -3,15 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { useSimulation, UserMode, UserGoal } from '../contexts/SimulationContext';
+import { ChevronRight } from 'lucide-react';
+import { useSimulation, UserGoal } from '../contexts/SimulationContext';
 import { useI18n } from '../contexts/SimulationContext';
 
 export default function SimulationOnboarding() {
   const { t, isLoading } = useI18n();
   const { setUserMode, setUserGoal, completeOnboarding } = useSimulation();
-  const [step, setStep] = useState(1);
-  const [selectedMode, setSelectedMode] = useState<UserMode | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | null>(null);
 
   if (isLoading) {
@@ -25,31 +23,20 @@ export default function SimulationOnboarding() {
     );
   }
 
-  const handleModeSelect = (mode: UserMode) => {
-    setSelectedMode(mode);
-  };
-
   const handleGoalSelect = (goal: UserGoal) => {
     setSelectedGoal(goal);
   };
 
-  const handleNext = () => {
-    if (step === 1 && selectedMode) {
-      setUserMode(selectedMode);
-      setStep(2);
-    } else if (step === 2 && selectedGoal) {
+  const handleContinue = () => {
+    if (selectedGoal) {
+      // Set mode to 'standard' by default for simplified onboarding
+      setUserMode('standard');
       setUserGoal(selectedGoal);
       completeOnboarding();
     }
   };
 
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-    }
-  };
-
-  const canContinue = (step === 1 && selectedMode) || (step === 2 && selectedGoal);
+  const canContinue = selectedGoal !== null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
@@ -61,115 +48,47 @@ export default function SimulationOnboarding() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  1
-                </div>
-                <div className={`w-8 h-1 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  2
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {step}/2
-              </p>
-            </div>
+            <CardTitle className="text-xl text-center">{t('onboarding.q_single')}</CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {step === 1 && (
-              <div className="space-y-4">
-                <div>
-                  <CardTitle className="text-lg">{t('onboarding.q_familiarity')}</CardTitle>
+            <RadioGroup 
+              value={selectedGoal || ''} 
+              onValueChange={(value) => handleGoalSelect(value as UserGoal)}
+              className="space-y-4"
+            >
+              {(['view', 'suggest', 'plan'] as UserGoal[]).map((goal) => (
+                <div key={goal} className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem 
+                      value={goal} 
+                      id={goal}
+                      data-testid={`radio-goal-${goal}`}
+                    />
+                    <Label 
+                      htmlFor={goal} 
+                      className="font-medium cursor-pointer flex-1"
+                    >
+                      {t(`onboarding.goal.${goal}`)}
+                    </Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground ml-7">
+                    {t(`onboarding.goal_help.${goal}`)}
+                  </p>
                 </div>
-
-                <RadioGroup 
-                  value={selectedMode || ''} 
-                  onValueChange={(value) => handleModeSelect(value as UserMode)}
-                  className="space-y-3"
-                >
-                  {(['easy', 'standard', 'pro'] as UserMode[]).map((mode) => (
-                    <div key={mode} className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem 
-                          value={mode} 
-                          id={mode}
-                          data-testid={`radio-familiarity-${mode}`}
-                        />
-                        <Label 
-                          htmlFor={mode} 
-                          className="font-medium cursor-pointer flex-1"
-                        >
-                          {t(`onboarding.familiarity.${mode}`)}
-                        </Label>
-                      </div>
-                      <p className="text-sm text-muted-foreground ml-6">
-                        {t(`onboarding.familiarity_help.${mode}`)}
-                      </p>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-4">
-                <div>
-                  <CardTitle className="text-lg">{t('onboarding.q_goal')}</CardTitle>
-                </div>
-
-                <RadioGroup 
-                  value={selectedGoal || ''} 
-                  onValueChange={(value) => handleGoalSelect(value as UserGoal)}
-                  className="space-y-3"
-                >
-                  {(['view', 'suggest', 'plan'] as UserGoal[]).map((goal) => (
-                    <div key={goal} className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem 
-                          value={goal} 
-                          id={goal}
-                          data-testid={`radio-goal-${goal}`}
-                        />
-                        <Label 
-                          htmlFor={goal} 
-                          className="font-medium cursor-pointer flex-1"
-                        >
-                          {t(`onboarding.goal.${goal}`)}
-                        </Label>
-                      </div>
-                      <p className="text-sm text-muted-foreground ml-6">
-                        {t(`onboarding.goal_help.${goal}`)}
-                      </p>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            )}
+              ))}
+            </RadioGroup>
           </CardContent>
 
-          <div className="flex justify-between p-6 pt-0">
+          <div className="flex justify-center p-6 pt-0">
             <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={step === 1}
-              data-testid="button-onboarding-back"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              {t('labels.back')}
-            </Button>
-
-            <Button
-              onClick={handleNext}
+              onClick={handleContinue}
               disabled={!canContinue}
               data-testid="button-onboarding-continue"
+              size="lg"
+              className="min-w-48"
             >
-              {step === 2 ? t('onboarding.button_continue') : t('onboarding.button_next')}
+              {t('onboarding.button_continue')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
