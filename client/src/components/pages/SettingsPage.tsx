@@ -4,13 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Crown, CreditCard, Bell, Calendar, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Crown, CreditCard, Bell, Calendar, CheckCircle, LogOut } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { useSimulation } from '../../contexts/SimulationContext';
+import { useSimulation, useI18n } from '../../contexts/SimulationContext';
 
 export default function SettingsPage() {
   const [, setLocation] = useLocation();
-  const { subscription, isProUser, cancelSubscription } = useSimulation();
+  const { subscription, isProUser, cancelSubscription, logout } = useSimulation();
+  const { t } = useI18n();
 
   const handleBack = () => {
     setLocation('/');
@@ -18,6 +19,14 @@ export default function SettingsPage() {
 
   const handleUpgrade = () => {
     setLocation('/upgrade');
+  };
+
+  const handleLogout = () => {
+    if (confirm(t('settings.logout_confirm'))) {
+      logout();
+      // Force a full page reload to ensure clean state reset
+      window.location.href = '/';
+    }
   };
 
   const planDetails = {
@@ -192,6 +201,30 @@ export default function SettingsPage() {
                 </div>
                 <Switch id="upgrade-offers" defaultChecked={!isPro} data-testid="switch-upgrade-offers" />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Logout Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LogOut className="h-5 w-5" />
+                {t('settings.logout')}
+              </CardTitle>
+              <CardDescription>
+                {t('settings.logout_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="destructive" 
+                onClick={handleLogout}
+                data-testid="button-logout"
+                className="w-full"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('settings.logout')}
+              </Button>
             </CardContent>
           </Card>
 

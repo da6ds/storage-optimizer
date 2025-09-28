@@ -104,6 +104,9 @@ interface SimulationActions {
   // Health score
   getHealthScore: () => number;
   
+  // Complete logout
+  logout: () => void;
+  
   // Gating logic for Score/Savings display
   shouldShowScore: () => boolean;
   shouldShowSavings: () => boolean;
@@ -346,6 +349,61 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     }));
   };
 
+  const logout = () => {
+    console.log('Logout called - clearing state and localStorage');
+    
+    // Clear all localStorage items
+    try {
+      const keysToRemove = [
+        'simulation_subscription',
+        'simulation_onboarding_complete', 
+        'simulation_checklist',
+        'hasLinkedDevice',
+        'hasLinkedCloud'
+      ];
+      
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`Removed localStorage key: ${key}`);
+      });
+    } catch (error) {
+      console.warn('Failed to clear localStorage during logout:', error);
+    }
+
+    // Reset state to initial values (same as initial state in useState)
+    const initialState: SimulationState = {
+      mode: null,
+      goal: null,
+      onboardingComplete: false,
+      showDetails: false,
+      checklist: {
+        deviceLinked: false,
+        cloudAccountsLinked: false,
+        optimizeRun: false
+      },
+      subscription: {
+        tier: 'free' as SubscriptionTier,
+        plan: null,
+        isActive: false,
+        expiresAt: null
+      },
+      files: [],
+      pricingConfig: null,
+      duplicateClusters: [],
+      optimizationActions: [],
+      storageBreakdown: [],
+      isLoading: true,
+      error: null
+    };
+
+    console.log('Setting state to initial values');
+    setState(initialState);
+
+    // Reload simulation data for fresh start
+    console.log('Reloading simulation data');
+    loadSimulationData();
+  };
+
   const toggleDetails = () => {
     setState(prev => ({ 
       ...prev, 
@@ -585,6 +643,7 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     completeOnboarding,
     refreshData,
     resetOnboarding,
+    logout,
     toggleDetails,
     markDeviceLinked,
     markCloudAccountsLinked,

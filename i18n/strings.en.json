@@ -251,5 +251,12 @@
     "step_completed": "Completed",
     "step_pending": "Pending", 
     "simulation_note": "This is a simulation preview. In a real implementation, you could follow these steps to optimize your storage."
+  },
+  "settings": {
+    "title": "Settings",
+    "back": "Back to app",
+    "logout": "Log Out",
+    "logout_description": "Clear all data and return to onboarding",
+    "logout_confirm": "Are you sure you want to log out? This will clear all your progress and return you to the beginning."
   }
 }
