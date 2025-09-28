@@ -513,9 +513,9 @@ export default function DuplicatesView() {
                 )}
               </Card>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
