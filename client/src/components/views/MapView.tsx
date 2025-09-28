@@ -434,8 +434,13 @@ function CloudNode({ provider, showDetails, index }: {
   const fileTypes = provider.file_types || {};
   const totalSize = Object.values(fileTypes).reduce((sum: number, type: any) => sum + type.size_gb, 0);
   
+  // Calculate waste percentage for heat tinting (based on cost efficiency and duplicates)
+  const duplicatePercent = 30; // Mock: 30% duplicates for demonstration
+  const isHighWaste = duplicatePercent > 25 || provider.estimated_monthly_cost > 25;
+  const heatTintClass = isHighWaste ? "border-destructive/50 bg-destructive/5" : "border-border";
+  
   return (
-    <Card className="w-32 hover-elevate cursor-pointer" data-testid={`node-cloud-${provider.provider}`}>
+    <Card className={`w-32 hover-elevate cursor-pointer ${heatTintClass}`} data-testid={`node-cloud-${provider.provider}`}>
       <CardContent className="p-3 text-center">
         <div className="flex flex-col items-center space-y-2">
           <Cloud className="h-6 w-6 text-primary" />
@@ -457,10 +462,10 @@ function CloudNode({ provider, showDetails, index }: {
                 </div>
                 <div className="text-xs text-muted-foreground">{Math.round(percentFull)}% full</div>
                 
-                {/* Mini file-type bars when Details is on */}
+                {/* Enhanced Details: File-type bars + waste analysis */}
                 {totalSize > 0 && (
                   <div className="w-full mt-2 space-y-1">
-                    <div className="text-xs text-muted-foreground">File types:</div>
+                    <div className="text-xs text-muted-foreground">File breakdown:</div>
                     <div className="flex h-1 w-full bg-muted rounded-full overflow-hidden">
                       {Object.entries(fileTypes).map(([type, stats]: [string, any], idx) => {
                         const percent = (stats.size_gb / totalSize) * 100;
@@ -476,6 +481,12 @@ function CloudNode({ provider, showDetails, index }: {
                         );
                       })}
                     </div>
+                    {isHighWaste && (
+                      <div className="text-xs text-destructive mt-1 flex items-center gap-1">
+                        <div className="w-1 h-1 bg-destructive rounded-full"></div>
+                        High optimization potential
+                      </div>
+                    )}
                   </div>
                 )}
               </>
@@ -502,8 +513,12 @@ function DeviceNode({ device, showDetails, index }: {
     other: { size_gb: 7, percent: 12 }
   };
   
+  // Calculate waste indicators for devices (high storage usage + unsynced data)
+  const isHighWaste = device.percentFull > 75; // Over 75% full indicates potential issues
+  const heatTintClass = isHighWaste ? "border-warning/50 bg-warning/5" : "border-border";
+  
   return (
-    <Card className="w-32 hover-elevate cursor-pointer" data-testid={`node-device-${device.id}`}>
+    <Card className={`w-32 hover-elevate cursor-pointer ${heatTintClass}`} data-testid={`node-device-${device.id}`}>
       <CardContent className="p-3 text-center">
         <div className="flex flex-col items-center space-y-2">
           <DeviceIcon className="h-6 w-6 text-foreground" />
@@ -520,9 +535,9 @@ function DeviceNode({ device, showDetails, index }: {
                 </div>
                 <div className="text-xs text-muted-foreground">{device.percentFull}% full</div>
                 
-                {/* Mini file-type bars for devices */}
+                {/* Enhanced Details: Content breakdown + storage warnings */}
                 <div className="w-full mt-2 space-y-1">
-                  <div className="text-xs text-muted-foreground">Content:</div>
+                  <div className="text-xs text-muted-foreground">Content breakdown:</div>
                   <div className="flex h-1 w-full bg-muted rounded-full overflow-hidden">
                     <div 
                       className="bg-primary" 
@@ -549,6 +564,12 @@ function DeviceNode({ device, showDetails, index }: {
                       aria-label="Other: 12%"
                     />
                   </div>
+                  {isHighWaste && (
+                    <div className="text-xs text-warning mt-1 flex items-center gap-1">
+                      <div className="w-1 h-1 bg-warning rounded-full"></div>
+                      Storage nearly full
+                    </div>
+                  )}
                 </div>
               </>
             )}
