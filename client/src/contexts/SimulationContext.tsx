@@ -181,6 +181,20 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
           checklist: parsedChecklist
         }));
       }
+      
+      // Check if this is a fresh onboarding start (no device linked)
+      const hasLinkedDevice = localStorage.getItem('hasLinkedDevice');
+      if (!hasLinkedDevice) {
+        // Ensure checklist starts fresh for new onboarding
+        setState(prev => ({
+          ...prev,
+          checklist: {
+            deviceLinked: false,
+            cloudAccountsLinked: false,
+            optimizeRun: false
+          }
+        }));
+      }
     } catch (error) {
       console.warn('Failed to restore app state:', error);
     }
