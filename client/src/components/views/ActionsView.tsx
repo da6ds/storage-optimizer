@@ -10,7 +10,7 @@ import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function ActionsView() {
-  const { optimizationActions, mode, isProUser } = useSimulation();
+  const { optimizationActions, mode, isProUser, showDetails } = useSimulation();
   const { t } = useI18n();
   const [, setLocation] = useLocation();
   
@@ -56,16 +56,18 @@ export default function ActionsView() {
       <EstimatedSavingsBanner />
 
       {/* Total savings potential */}
-      <Card>
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {formatCurrency(totalSavings)}
-          </div>
-          <div className="text-sm text-muted-foreground" data-testid="text-total-savings">
-            {t('labels.potential_monthly_savings')} • {sortedActions.length} {sortedActions.length === 1 ? t('labels.recommendation') : t('labels.recommendations')}
-          </div>
-        </CardContent>
-      </Card>
+      {showDetails && (
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {formatCurrency(totalSavings)}
+            </div>
+            <div className="text-sm text-muted-foreground" data-testid="text-total-savings">
+              {t('labels.potential_monthly_savings')} • {sortedActions.length} {sortedActions.length === 1 ? t('labels.recommendation') : t('labels.recommendations')}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Explanation */}
       <Card>
@@ -133,22 +135,26 @@ export default function ActionsView() {
                         </CardDescription>
                         
                         {/* Simplified metadata */}
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                            {formatCurrency(action.estimated_savings_usd)} / month
+                        {showDetails && (
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                              {formatCurrency(action.estimated_savings_usd)} / month
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getFrictionColor(action.friction)}`}
+                            >
+                              {t(`actions.friction_levels.${action.friction}`)} effort
+                            </Badge>
                           </div>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${getFrictionColor(action.friction)}`}
-                          >
-                            {t(`actions.friction_levels.${action.friction}`)} effort
-                          </Badge>
-                        </div>
+                        )}
 
                         {/* Simplified summary */}
-                        <div className="text-xs text-muted-foreground mt-2">
-                          {action.affected_files.length} files
-                        </div>
+                        {showDetails && (
+                          <div className="text-xs text-muted-foreground mt-2">
+                            {action.affected_files.length} files
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

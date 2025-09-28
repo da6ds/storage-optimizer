@@ -41,7 +41,7 @@ const categorizeDuplicates = (clusters: DuplicateCluster[]) => {
 };
 
 export default function DuplicatesView() {
-  const { duplicateClusters, mode } = useSimulation();
+  const { duplicateClusters, mode, showDetails } = useSimulation();
   const { t } = useI18n();
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['photos', 'videos', 'other']));
@@ -86,26 +86,28 @@ export default function DuplicatesView() {
       <EstimatedSavingsBanner />
 
       {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card>
-          <CardContent className="p-3 text-center">
-            <div className="text-lg font-semibold">{duplicateClusters.length}</div>
-            <div className="text-xs text-muted-foreground">{t('duplicates.clusters_found')}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 text-center">
-            <div className="text-lg font-semibold">{totalDuplicates}</div>
-            <div className="text-xs text-muted-foreground">{t('duplicates.total_duplicates')}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 text-center">
-            <div className="text-lg font-semibold">{formatCurrency(totalSavings)}</div>
-            <div className="text-xs text-muted-foreground">{t('duplicates.potential_savings')}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {showDetails && (
+        <div className="grid grid-cols-3 gap-3">
+          <Card>
+            <CardContent className="p-3 text-center">
+              <div className="text-lg font-semibold">{duplicateClusters.length}</div>
+              <div className="text-xs text-muted-foreground">{t('duplicates.clusters_found')}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 text-center">
+              <div className="text-lg font-semibold">{totalDuplicates}</div>
+              <div className="text-xs text-muted-foreground">{t('duplicates.total_duplicates')}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 text-center">
+              <div className="text-lg font-semibold">{formatCurrency(totalSavings)}</div>
+              <div className="text-xs text-muted-foreground">{t('duplicates.potential_savings')}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Explanation */}
       <Card>
@@ -136,9 +138,11 @@ export default function DuplicatesView() {
                       <Image className="h-5 w-5 text-blue-600" />
                       <div>
                         <CardTitle className="text-lg">Same photos in multiple clouds</CardTitle>
-                        <CardDescription>
-                          {categorizedDuplicates.photos.length} photo groups • {formatCurrency(categorizedDuplicates.photos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
-                        </CardDescription>
+                        {showDetails && (
+                          <CardDescription>
+                            {categorizedDuplicates.photos.length} photo groups • {formatCurrency(categorizedDuplicates.photos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                          </CardDescription>
+                        )}
                       </div>
                     </div>
                     <Button variant="ghost" size="sm">
@@ -161,14 +165,18 @@ export default function DuplicatesView() {
                               <div className="font-medium text-sm">
                                 {cluster.files[0].path.split('/').pop() || 'Unknown photo'}
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
-                              </div>
+                              {showDetails && (
+                                <div className="text-xs text-muted-foreground">
+                                  Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                {formatCurrency(cluster.potential_savings_usd)} savings
-                              </Badge>
+                              {showDetails && (
+                                <Badge variant="outline" className="text-xs">
+                                  {formatCurrency(cluster.potential_savings_usd)} savings
+                                </Badge>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -199,9 +207,11 @@ export default function DuplicatesView() {
                                     <div className="font-medium text-sm">
                                       {t(`providers.${file.provider}`)}
                                     </div>
-                                    <div className="text-xs text-muted-foreground truncate">
-                                      {file.path}
-                                    </div>
+                                    {showDetails && (
+                                      <div className="text-xs text-muted-foreground truncate">
+                                        {file.path}
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <span className="text-xs text-muted-foreground">
@@ -234,9 +244,11 @@ export default function DuplicatesView() {
                       <Video className="h-5 w-5 text-purple-600" />
                       <div>
                         <CardTitle className="text-lg">Identical videos</CardTitle>
-                        <CardDescription>
-                          {categorizedDuplicates.videos.length} video groups • {formatCurrency(categorizedDuplicates.videos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
-                        </CardDescription>
+                        {showDetails && (
+                          <CardDescription>
+                            {categorizedDuplicates.videos.length} video groups • {formatCurrency(categorizedDuplicates.videos.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                          </CardDescription>
+                        )}
                       </div>
                     </div>
                     <Button variant="ghost" size="sm">
@@ -259,14 +271,18 @@ export default function DuplicatesView() {
                               <div className="font-medium text-sm">
                                 {cluster.files[0].path.split('/').pop() || 'Unknown video'}
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
-                              </div>
+                              {showDetails && (
+                                <div className="text-xs text-muted-foreground">
+                                  Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                {formatCurrency(cluster.potential_savings_usd)} savings
-                              </Badge>
+                              {showDetails && (
+                                <Badge variant="outline" className="text-xs">
+                                  {formatCurrency(cluster.potential_savings_usd)} savings
+                                </Badge>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -297,9 +313,11 @@ export default function DuplicatesView() {
                                     <div className="font-medium text-sm">
                                       {t(`providers.${file.provider}`)}
                                     </div>
-                                    <div className="text-xs text-muted-foreground truncate">
-                                      {file.path}
-                                    </div>
+                                    {showDetails && (
+                                      <div className="text-xs text-muted-foreground truncate">
+                                        {file.path}
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <span className="text-xs text-muted-foreground">
@@ -332,9 +350,11 @@ export default function DuplicatesView() {
                       <FileText className="h-5 w-5 text-green-600" />
                       <div>
                         <CardTitle className="text-lg">Exact duplicates</CardTitle>
-                        <CardDescription>
-                          {categorizedDuplicates.other.length} file groups • {formatCurrency(categorizedDuplicates.other.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
-                        </CardDescription>
+                        {showDetails && (
+                          <CardDescription>
+                            {categorizedDuplicates.other.length} file groups • {formatCurrency(categorizedDuplicates.other.reduce((sum, cluster) => sum + cluster.potential_savings_usd, 0))} potential savings
+                          </CardDescription>
+                        )}
                       </div>
                     </div>
                     <Button variant="ghost" size="sm">
@@ -357,14 +377,18 @@ export default function DuplicatesView() {
                               <div className="font-medium text-sm">
                                 {cluster.files[0].path.split('/').pop() || 'Unknown file'}
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
-                              </div>
+                              {showDetails && (
+                                <div className="text-xs text-muted-foreground">
+                                  Found in {cluster.provider_count} cloud{cluster.provider_count > 1 ? 's' : ''} • {cluster.files.length} copies
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                {formatCurrency(cluster.potential_savings_usd)} savings
-                              </Badge>
+                              {showDetails && (
+                                <Badge variant="outline" className="text-xs">
+                                  {formatCurrency(cluster.potential_savings_usd)} savings
+                                </Badge>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -395,9 +419,11 @@ export default function DuplicatesView() {
                                     <div className="font-medium text-sm">
                                       {t(`providers.${file.provider}`)}
                                     </div>
-                                    <div className="text-xs text-muted-foreground truncate">
-                                      {file.path}
-                                    </div>
+                                    {showDetails && (
+                                      <div className="text-xs text-muted-foreground truncate">
+                                        {file.path}
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <span className="text-xs text-muted-foreground">

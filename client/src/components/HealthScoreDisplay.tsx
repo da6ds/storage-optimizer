@@ -59,19 +59,17 @@ export default function HealthScoreDisplay() {
         
         <Progress value={score} className="h-2" />
         
-        {(showExplainer || showDetails) && (
+        {showDetails && (showExplainer || true) && (
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
             <p className="font-medium">What this means:</p>
             <p>We look at duplicates, large old files, cost efficiency, and how scattered your files are. The score helps you understand your storage health at a glance.</p>
-            {showDetails && (
-              <div className="mt-2 space-y-1">
-                <p>• Duplication (35%): Fewer duplicates = higher score</p>
-                <p>• Cold bulk (25%): Less old, large files = higher score</p>
-                <p>• Cost efficiency (25%): Lower potential savings = higher score</p>
-                <p>• Fragmentation (10%): Fewer providers = higher score</p>
-                <p>• Risk posture (5%): Having backups = bonus points</p>
-              </div>
-            )}
+            <div className="mt-2 space-y-1">
+              <p>• Duplication (35%): Fewer duplicates = higher score</p>
+              <p>• Cold bulk (25%): Less old, large files = higher score</p>
+              <p>• Cost efficiency (25%): Lower potential savings = higher score</p>
+              <p>• Fragmentation (10%): Fewer providers = higher score</p>
+              <p>• Risk posture (5%): Having backups = bonus points</p>
+            </div>
           </div>
         )}
       </CardContent>

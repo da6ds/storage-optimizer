@@ -7,7 +7,7 @@ import EstimatedSavingsBanner from '../EstimatedSavingsBanner';
 import HealthScoreDisplay from '../HealthScoreDisplay';
 
 export default function CostsView() {
-  const { storageBreakdown, mode, pricingConfig } = useSimulation();
+  const { storageBreakdown, mode, pricingConfig, showDetails } = useSimulation();
   const { t } = useI18n();
 
   const totalCost = storageBreakdown.reduce((sum, p) => sum + p.estimated_monthly_cost, 0);
@@ -74,12 +74,14 @@ export default function CostsView() {
         <CardContent>
           <div className="space-y-4">
             {/* Table header */}
-            <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
-              <div>{t('costs.provider')}</div>
-              <div className="text-right">{t('costs.used')}</div>
-              <div className="text-right">{t('costs.cost')}</div>
-              <div>Comparison</div>
-            </div>
+            {showDetails && (
+              <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+                <div>{t('costs.provider')}</div>
+                <div className="text-right">{t('costs.used')}</div>
+                <div className="text-right">{t('costs.cost')}</div>
+                <div>Comparison</div>
+              </div>
+            )}
 
             {/* Cost rows */}
             {storageBreakdown.length === 0 ? (
@@ -87,7 +89,8 @@ export default function CostsView() {
                 <DollarSign className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-muted-foreground">No cost data available</p>
               </div>
-            ) : (
+            ) : showDetails ? (
+              // Detailed 4-column view
               storageBreakdown.map((provider) => (
                 <div key={provider.provider} className="space-y-2">
                   <div className="grid grid-cols-4 gap-2 items-center">
@@ -124,6 +127,15 @@ export default function CostsView() {
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Simplified 1-column view
+              storageBreakdown.map((provider) => (
+                <div key={provider.provider} className="flex items-center space-x-3 py-3 border-b last:border-b-0">
+                  <div className="font-medium text-sm">
+                    {t(`providers.${provider.provider}`)}
                   </div>
                 </div>
               ))
