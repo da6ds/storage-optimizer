@@ -102,6 +102,11 @@ interface SimulationActions {
   
   // Health score
   getHealthScore: () => number;
+  
+  // Gating logic for Score/Savings display
+  shouldShowScore: () => boolean;
+  shouldShowSavings: () => boolean;
+  getGatingMessage: () => string;
 }
 
 type SimulationContextType = SimulationState & SimulationActions;
@@ -523,6 +528,27 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     return clamp(healthScore, 0, 100);
   };
 
+  // Gating logic for Score/Savings display based on checklist progress
+  const shouldShowScore = (): boolean => {
+    // Hide Score until Step 2 (cloudAccountsLinked) is complete
+    return state.checklist.cloudAccountsLinked;
+  };
+
+  const shouldShowSavings = (): boolean => {
+    // Hide Savings until Step 1 (deviceLinked) is complete
+    return state.checklist.deviceLinked;
+  };
+
+  const getGatingMessage = (): string => {
+    if (!state.checklist.deviceLinked) {
+      return "Link this device to begin.";
+    }
+    if (!state.checklist.cloudAccountsLinked) {
+      return "Partial (device only)";
+    }
+    return "";
+  };
+
   const contextValue: SimulationContextType = {
     ...state,
     setUserMode,
@@ -541,7 +567,10 @@ export function SimulationProvider({ children }: SimulationProviderProps) {
     cancelSubscription,
     isProUser,
     getPotentialSavings,
-    getHealthScore
+    getHealthScore,
+    shouldShowScore,
+    shouldShowSavings,
+    getGatingMessage
   };
 
   return (

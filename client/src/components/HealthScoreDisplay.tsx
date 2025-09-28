@@ -7,11 +7,13 @@ import { useState } from 'react';
 import { useSimulation, useI18n } from '../contexts/SimulationContext';
 
 export default function HealthScoreDisplay() {
-  const { getHealthScore, showDetails } = useSimulation();
+  const { getHealthScore, showDetails, shouldShowScore, getGatingMessage } = useSimulation();
   const { t } = useI18n();
   const [showExplainer, setShowExplainer] = useState(false);
 
   const score = getHealthScore();
+  const canShowScore = shouldShowScore();
+  const gatingMessage = getGatingMessage();
   
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600 dark:text-green-400';
@@ -49,17 +51,35 @@ export default function HealthScoreDisplay() {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-3xl font-bold">
-            <span className={getScoreColor(score)}>{score}</span>
-            <span className="text-lg text-muted-foreground">/100</span>
+            {canShowScore ? (
+              <>
+                <span className={getScoreColor(score)} data-testid="text-health-score">{score}</span>
+                <span className="text-lg text-muted-foreground">/100</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground" data-testid="text-health-score">—</span>
+            )}
           </div>
-          <Badge variant="outline" className={`${zone.color} text-white`}>
-            {zone.label}
-          </Badge>
+          {canShowScore ? (
+            <Badge variant="outline" className={`${zone.color} text-white`} data-testid="badge-health-zone">
+              {zone.label}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground" data-testid="badge-health-zone">
+              Pending
+            </Badge>
+          )}
         </div>
         
-        <Progress value={score} className="h-2" />
+        <Progress value={canShowScore ? score : 0} className="h-2" />
         
-        {showDetails && (showExplainer || true) && (
+        {!canShowScore && gatingMessage && (
+          <div className="text-sm text-muted-foreground text-center">
+            {gatingMessage}
+          </div>
+        )}
+        
+        {canShowScore && showDetails && showExplainer && (
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
             <p className="font-medium">What this means:</p>
             <p>We look at duplicates, large old files, cost efficiency, and how scattered your files are. The score helps you understand your storage health at a glance.</p>

@@ -10,11 +10,18 @@ interface EstimatedSavingsBannerProps {
 }
 
 export default function EstimatedSavingsBanner({ onUpgradeClick }: EstimatedSavingsBannerProps) {
-  const { isProUser, getPotentialSavings } = useSimulation();
+  const { isProUser, getPotentialSavings, shouldShowSavings } = useSimulation();
   const [, setLocation] = useLocation();
   
   // Don't show banner for pro users
   if (isProUser()) {
+    return null;
+  }
+
+  const canShowSavings = shouldShowSavings();
+  
+  // Don't show banner if gating prevents showing savings
+  if (!canShowSavings) {
     return null;
   }
 
@@ -42,7 +49,7 @@ export default function EstimatedSavingsBanner({ onUpgradeClick }: EstimatedSavi
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">
+              <h3 className="font-semibold text-lg" data-testid="text-estimated-savings">
                 You could save about {formatCurrency(potentialSavings)}/month
               </h3>
               <p className="text-sm text-muted-foreground">

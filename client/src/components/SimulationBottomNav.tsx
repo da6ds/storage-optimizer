@@ -16,12 +16,8 @@ const navItems = {
 };
 
 export default function SimulationBottomNav() {
-  const { onboardingComplete } = useSimulation();
   const { t } = useI18n();
   const [location] = useLocation();
-
-  // Hide navigation during onboarding
-  if (!onboardingComplete) return null;
 
   // Fixed navigation: Map · Duplicates · Costs · Actions
   const fixedNavItems = ['map', 'duplicates', 'costs', 'actions'];
@@ -37,19 +33,21 @@ export default function SimulationBottomNav() {
           const Icon = item.icon;
 
           return (
-            <Link key={itemKey} href={`/${itemKey}`}>
-              <Button
-                variant={isActive ? "default" : "ghost"}
-                size="sm"
-                className="flex flex-col h-12 w-16 px-1 py-1"
-                data-testid={`nav-${itemKey}`}
-              >
+            <Button
+              key={itemKey}
+              variant={isActive ? "default" : "ghost"}
+              size="sm"
+              className="flex flex-col h-12 w-16 px-1 py-1"
+              data-testid={`nav-${itemKey}`}
+              asChild
+            >
+              <Link href={`/${itemKey}`} aria-current={isActive ? "page" : undefined}>
                 <Icon className="h-4 w-4 mb-1" />
                 <span className="text-xs leading-none">
                   {t(item.label)}
                 </span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           );
         })}
       </div>
