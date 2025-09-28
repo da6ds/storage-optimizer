@@ -1,0 +1,52 @@
+Plan task (no code yet): Visual Map + persistent nav + persistent checklist + gating Score/Savings
+
+Global requirements
+	•	Bottom nav (Map · Duplicates · Costs · Actions) is persistent on every page.
+	•	A 3-step checklist is persistent on every page (top area) until all steps are completed, then collapses to a small “All set” badge + Refresh connections button. Steps:
+	1.	Link this device (grant local scan permission)
+	2.	Link cloud accounts (Drive, iCloud, OneDrive, Dropbox)
+	3.	Optimize (select actions and run)
+	•	Gating rule: Do not show Score or Savings anywhere until Step 1 (Link this device) is completed.
+	•	Before Step 1: show placeholders “—” and a note: “Link this device to begin.”
+	•	After Step 1 but before Step 2: show partial totals limited to local device; Score remains hidden until at least one cloud is linked.
+	•	After Step 2: compute Score/Savings using all linked sources.
+	•	After Step 3: show Success state and history.
+	•	Remove any extra left-side configs. Header has only: Details button (toggles ON/OFF; highlighted when ON) and Settings (gear; tap to enter/exit Settings).
+
+Visual Map (add alongside List)
+	•	Add toggle at top of Map: List | Visual (remember choice).
+	•	Layout (mobile-first): center avatar; Devices (phone/tablet/laptop) below; Clouds (Drive/iCloud/OneDrive/Dropbox) above.
+	•	Node cards show: Used (GB), % full, Est. $/mo (clouds only).
+When Details = ON, also show mini file-type bars (Photos / Videos / Docs / Other).
+	•	Edges between nodes represent sync/backup relationships; thickness = volume.
+Dotted arcs = duplicate relationships; tapping opens a simple list of affected locations/files (no jargon).
+	•	Heat tint nodes with high waste (many dupes or cold bulk).
+
+Totals card (always visible on Map, but gated by steps)
+	•	Fields:
+	•	Total storage indexed: {{totalGB}}
+	•	Unique data: {{uniqueGB}}
+	•	Duplicates: {{dupeGB}} and {{dupe%}} of total
+	•	Estimated monthly cost: {{totalCost}}
+	•	Gating behavior:
+	•	Before Step 1: show placeholders and the “Link this device to begin” note.
+	•	After Step 1: totals reflect local device only and are labeled “Partial (device only)”.
+	•	After Step 2: totals reflect all linked sources and lose the “Partial” label.
+	•	When Details = ON, include a one-line explainer: “Unique vs duplicates is hash-based; no double counting.”
+
+Score on Map (gated)
+	•	Keep the Storage Health Score (0–100) gauge on Map, but hidden until Step 2 is complete (at least one cloud linked).
+	•	“What this means” opens a short paragraph; keep plain language.
+
+Deliverables to update
+	•	/docs/wireframes.md (Visual Map + persistent checklist + bottom nav)
+	•	/docs/ux-flow.md (step gating for Score/Savings; checklist states)
+	•	/docs/copy.md (placeholder messages and labels)
+	•	/docs/responsive.md (iPad split, Web wide for Visual Map + checklist)
+
+Acceptance
+	•	Visual Map interactions documented (tap node, tap duplicate arc, long-press = refresh).
+	•	Totals card fields and formulas specified; Details toggles the extra explanations.
+	•	File-type breakdown appears only when Details = ON.
+	•	Bottom nav and the 3-step checklist are visible on all pages until completed, then collapse globally.
+	•	Score/Savings are not shown before Step 1; Score remains hidden until Step 2.
